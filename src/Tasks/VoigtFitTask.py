@@ -1,32 +1,19 @@
-from re import M
-import time
-
-from queue import Empty
-import multiprocessing as mp
-from multiprocessing import Process, Queue
-
 import logging
-
+import multiprocessing as mp
+import time
+from multiprocessing import Process
+from queue import Empty
 
 import numpy as np
 from scipy.optimize import curve_fit
-from sympy import false, true
 
-from IO.IO_Utils import DetectorDataParser, SearchUtils, IO
+from Tasks.Config import TaskConfigs
+from IO.IO_Utils import DetectorDataParser
+from IO.IO_Utils import IO
+from IO.IO_Utils import SearchUtils
 from Tasks.Task import Task
-from Tasks.TaskRegisters import *
 
 #make config struct
-class PseudoVoigt_Config():
-    filenamePrefix = "PseudoVoigt_data_"
-    taskName = "pseudoVoigt_fit"
-    description = "Does things"
-    dependencies = {AzimuthalIntegrationTask.getFuncName():1}
-    paramsToExport = ["FilePath,Azim,LorCoeff","A","x0","FWHM","LorCoeff_Err","A_Err","x0_Err","FWHM_Err"]
-    precision = np.longdouble
-    preFix = "pseudoVoigt"
-    modes = ["single_csv","multipleD_csv","multipleD_pickle"]
-    units = [{"FilePath":"string","azimAngle":"°"}| {"LorCoeff":"unknown","A":"xray count","x0":"°","FWHM":"unknown","LorCoeff_Err":"unknown","A_Err":"xray count","x0_Err":"°","FWHM_Err":"unkown"}]
 
 
 
@@ -45,11 +32,11 @@ class PseudoVoigtFit:
 
 class PseudoVoigtTask(Task):
     def getDescription():
-        return PseudoVoigt_Config.description
+        return TaskConfigs.VoigtFit_Config.description
     def getFuncName():
-        return PseudoVoigt_Config.taskName  
+        return TaskConfigs.VoigtFit_Config.taskName  
     def getDependencies():
-        return PseudoVoigt_Config.dependencies
+        return TaskConfigs.VoigtFit_Config.dependencies
     
                     
     def doPseudoVoigtFitting(q,params):
@@ -61,7 +48,8 @@ class PseudoVoigtTask(Task):
                 try:
                     azimIntegrationData =  params["funcRet"]["azimuthal_integration"][path]
                 except KeyError or TypeError:
-                    azimIntegrationData =DetectorDataParser.loadDetectorFileToAzimListFormat(path,PseudoVoigt_Config.precision)
+                    params = {"path":path, "precision":TaskConfigs.VoigtFitTask_Config.precision}
+                    azimIntegrationData =TaskConfigs.VoigtFitTask_Config.readFunction(params)
                 
                 interval = (azimIntegrationData[1] < params["maxTheta"]) & (params["minTheta"] <azimIntegrationData[1])
                 fitData = []
@@ -72,7 +60,7 @@ class PseudoVoigtTask(Task):
                     
                 params["returnVal"][path.replace(path.split(".")[-1],"cbf")]=fitData
                 
-                IO.saveResultDictToFile(fitData,[mode for mode in PseudoVoigt_Config.modes if "MP" in mode],path=path)
+                IO.saveResultDictToFile(fitData,[mode for mode in TaskConfigs.VoigtFitTask_Config.modes if "MP" in mode],path=path)
      
                 params["logger"].info("Fitted File: " + path)
             except Empty:
@@ -82,8 +70,8 @@ class PseudoVoigtTask(Task):
     #def 
     def fillQueue(funcRet,directoryPaths,mode,queue):
         for path in directoryPaths:
-            for filePath in SearchUtils.getFilesThatEndwith(path,".azim"):
-                if all([PseudoVoigt_Config.filenamePrefix not in file or mode for file in SearchUtils.getFilesThatEndwith(path,".csv")]):
+            for filePath in SearchUtils.getFilesThatEndwith(path,".cbf"):
+                if all([TaskConfigs.VoigtFitTask_Config.filenamePrefix not in file or mode for file in SearchUtils.getFilesThatEndwith(path,".csv")]):
                     queue.put(filePath)
     
     def runTask(minTheta,maxTheta,directoryPaths,isMultiProcessingAllowed,thetaAV,peak,mode,handles,funcRet):
@@ -94,7 +82,7 @@ class PseudoVoigtTask(Task):
             logger.setLevel(logging.INFO)
             queue = m.Queue()
             
-            params = m.dict({"logger":logger,"funcRet":funcRet,"maxTheta":maxTheta,"minTheta":minTheta,"thetaPeak":thetaAV[peak],"returnVal":m.dict({"units":PseudoVoigt_Config.units})})
+            params = m.dict({"logger":logger,"funcRet":funcRet,"maxTheta":maxTheta,"minTheta":minTheta,"thetaPeak":thetaAV[peak],"returnVal":m.dict({"units":TaskConfigs.VoigtFitTask_Config.units})})
             
             PseudoVoigtTask.fillQueue(funcRet,directoryPaths,mode,queue)
         
@@ -115,12 +103,10 @@ class PseudoVoigtTask(Task):
             
             logger.info("Finished Task in %ss"%(str(time.time()-startExecTime))) 
             results  =dict(params["returnVal"])
-            IO.saveResultDictToFile(results,modes=[mode for mode in PseudoVoigt_Config.modes if not "MP" in mode],args={"prefix":PseudoVoigt_Config.preFix})
+            
+            params = {"dict": results,"prefix":TaskConfigs.VoigtFitTask_Config.preFix,"precision":TaskConfigs.VoigtFitTask_Config.precision}
+            for saveDict in TaskConfigs.VoigtFitTask_Config.saveFunctions:
+                saveDict(params)  
                 
             del(m)
             return results
-
-            
-        
-        
-        

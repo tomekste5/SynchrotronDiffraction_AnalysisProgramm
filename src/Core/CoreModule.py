@@ -1,6 +1,7 @@
 import time
 
 from Core.CoreModuleRegister import *
+taskRegister = TaskRegister.taskRegister
 
 class Queue:
 

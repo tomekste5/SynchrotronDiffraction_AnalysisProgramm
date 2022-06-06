@@ -12,26 +12,6 @@ import bz2
 import re
 import shutil
 
-
-
-class DetectorDataParser:
-    def loadDetectorFileRaw(path):
-        return fabio.open(path)
-    def loadDetectorFileToAzimListFormat(azimPath,precision):
-        data = []
-        azimFile = DetectorDataParser.loadDetectorFileRaw(azimPath)
-        deltaTheta = -precision(azimFile.header["2th_deg_min"]) + precision(azimFile.header["2th_deg_max"])
-        deltaChi = -precision(azimFile.header["chi_min"])+precision(azimFile.header["chi_max"])
-        data.append(azimFile.data)
-        data.append(np.arange(precision(azimFile.header["2th_deg_min"]),precision(azimFile.header["2th_deg_max"]),deltaTheta/precision(azimFile.header["Dim_1"])))
-        data.append(np.arange(precision(azimFile.header["chi_min"]),precision(azimFile.header["chi_max"]),deltaChi/precision(azimFile.header["Dim_2"])))
-        
-        return data
-        
-    def getAllowedFormats():
-        return "cbf"
-
-
 class SearchUtils:
     def getDirectory(filePath):
         return os.path.split(filePath)[0]
@@ -43,8 +23,25 @@ class SearchUtils:
                 if(file.lower().endswith(fileType)):
                         graph.append(path+"/"+file)
         return graph
+    def getResultDirectory(overwrite,toFind,directory,fileName, newRUN = True):
+        idx = directory.find(toFind)
+        resDirectory = directory[:idx]+"".join(re.split("_",toFind)[0:-1])+"_Results_"
+        runNr = 0
+        run_resDirectory = resDirectory + "Run" + f"{runNr:03}"
+        
+        if(os.path.exists(run_resDirectory+"/") or not newRUN):
+            return run_resDirectory
+        
+        elif(not overwrite and newRUN):
+            while(os.path.exists(run_resDirectory)):
+                run_resDirectory = resDirectory + ("Run"+f"{runNr:03}")
+                runNr +=1
+        else:
+            shutil.rmtree(resDirectory)     
+        os.makedirs(run_resDirectory)
+        return run_resDirectory
 
-
+"""
 class IO:
         
     def loadDict(path, mode,args={}):
@@ -191,3 +188,4 @@ class IO:
         params = {"dict":dicts,"path":path,"overwrite":overwrite} | args
         for mode in modes:
             defModes[mode](params)
+"""

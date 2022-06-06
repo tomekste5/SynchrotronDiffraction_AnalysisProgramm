@@ -1,18 +1,17 @@
+import logging
+import multiprocessing as mp
 import os
 import time
+from multiprocessing import Process
+from queue import Empty
 
 import pyFAI
 
-from multiprocessing import Process
-import multiprocessing as mp
-from queue import Empty
-import logging
-
+from Tasks.Config import TaskConfigs
 from IO.IO_Utils import DetectorDataParser
 from IO.IO_Utils import IO
-from Tasks.Task import Task
-
 from Multiprocessing import Pool
+from Tasks.Task import Task
 
 class AzimuthalIntegrator:
         
@@ -37,7 +36,7 @@ class AzimuthalIntegrationTask(Task):
         while(True):
             try:
                 path = queue.get(timeout=1)
-                detectorData = DetectorDataParser.loadDetectorFileRaw(path).data
+                detectorData = TaskConfigs.AzimuthalIntegrationTask_Config.readFunction(path).data
                 azimData = params["azimIntegrator"].integrate2D(detectorData,os.path.splitext(path)[0] + ".azim")
                 params["returnVal"][path] = azimData
                 params["logger"].info('Child process integrated File: ' + path)
@@ -69,7 +68,7 @@ class AzimuthalIntegrationTask(Task):
             logger = workerPool.getLogger()
             
             queue =  manager.Queue()
-            params = manager.dict({"logger":logger,"azimIntegrator":azimIntegrator,"returnVal":{}})
+            params = manager.dict({"logger":logger,"azimIntegrator":azimIntegrator,"returnVal":manager.dict({"units":TaskConfigs.AzimuthalIntegrationTask_Config.units})})
             
             AzimuthalIntegrationTask.fillQueue(directoryPaths,queue,mode)
 
@@ -95,11 +94,6 @@ class AzimuthalIntegrationTask(Task):
             del(m)
             """
             logger.info("Finished Task in %ss"%(str(time.time()-executionStart))) 
-            print(dict(params["returnVal"]))
-            return (params["returnVal"])
+            return (dict(params["returnVal"]))
             #Fill Queue with directory Paths
-                # load file 
-            
-        
-        
-        
+                # load file
