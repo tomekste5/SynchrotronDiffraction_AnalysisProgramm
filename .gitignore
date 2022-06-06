@@ -1,0 +1,16 @@
+/.obf. FS
+/.vscode
+/AzimListReaderDESYSchleifen.m
+/ConnectorAzimListStrainDESYSchleifen.m
+/CurrentToolChain.md
+/DataAnalysis.ipynb
+/insitu20x200.azimint.json
+/insitu_DESY_field.m
+/mtmep.npy
+/output.png
+/PicturePetra3.m
+/SynchrotonDataprocessor.py
+/test.ipynb
+/VisulizeDetectorData.ipynb
+/wind.txt
+/windprofile.py
