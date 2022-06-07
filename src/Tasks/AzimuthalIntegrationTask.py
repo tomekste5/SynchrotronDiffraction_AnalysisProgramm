@@ -4,14 +4,16 @@ import os
 import time
 from multiprocessing import Process
 from queue import Empty
+from unittest import result
 
 import pyFAI
 
 from Tasks.Config import TaskConfigs
-from IO.IO_Utils import DetectorDataParser
-from IO.IO_Utils import IO
+from IO.Parser import XRayDetectorDataParser
+from IO.IO_Utils import SearchUtils
 from Multiprocessing import Pool
 from Tasks.Task import Task
+from IO.Parser import XRayDetectorDataParser
 
 class AzimuthalIntegrator:
         
@@ -44,12 +46,12 @@ class AzimuthalIntegrationTask(Task):
                 break
             except FileNotFoundError:
                 params["logger"].error("FileNotFoundError: No such file or directory: " +path)   
+                
+                
     def fillQueue(directoryPaths,queue,mode):
         for directory in directoryPaths:
-            for files in os.walk(directory):
-                for file in files[2]:
-                    if(file.lower().endswith((DetectorDataParser.getAllowedFormats())) and (mode or not os.path.exists(directory+"/"+file.replace(file.split(".")[-1],"azim")))):
-                        queue.put(directory+"/"+file)
+            for filePath in SearchUtils.getFilesThatEndwith(directory,XRayDetectorDataParser.getAllowedFormats()):
+                queue.put(filePath)
                         
     def runTask(npt_rad,npt_azim,radial_range,settingJson,directoryPaths,isMultiProcessingAllowed,mode,handles):   
             azimIntegrator = AzimuthalIntegrator(settingJson=settingJson,args = (npt_rad,npt_azim,radial_range))   
@@ -94,6 +96,7 @@ class AzimuthalIntegrationTask(Task):
             del(m)
             """
             logger.info("Finished Task in %ss"%(str(time.time()-executionStart))) 
-            return (dict(params["returnVal"]))
+            results = dict(params["returnVal"])
+            return results
             #Fill Queue with directory Paths
                 # load file

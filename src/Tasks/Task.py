@@ -1,5 +1,5 @@
 from Tasks.Config import TaskConfigs
-from Tasks.TaskRegister import taskRegister
+from Tasks import TaskRegister
 class Task():
     def runTask():
         raise NotImplementedError

@@ -18,9 +18,9 @@ taskRegister = {
                 "input_params": [Param.getMinTheta,Param.getMaxTheta,Param.getDirectoryPaths,Param.getIsMultiprocessingAllowed,Param.getThetaAV,Param.getPeak,Param.getMode,Param.getProgressBarHandles],
                 "handle":VoigtFitTask.runTask,        
     },
-    "axisTransformFit": {
+    "axisTransform_fit": {
                 "description": "do axis transform",
-                "dependencies": {AxisTransformationTask.getFuncName():1},
+                "dependencies": {VoigtFitTask.getFuncName():1},
                 "input_params": [Param.getMinTheta,Param.getDirectoryPaths,Param.getIsMultiprocessingAllowed,Param.getWavelength,Param.getPeak,Param.getEModules,Param.getPoissonNumber,Param.getD0,Param.getPositionsZ,Param.getPositionsY,Param.getProgressBarHandles],
                 "handle":AxisTransformationTask.runTask,        
     }

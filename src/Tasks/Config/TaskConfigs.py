@@ -9,19 +9,19 @@ class AzimuthalIntegrationTask_Config():
     paramsToExport = ["FilePath,Azim,LorCoeff","A","x0","FWHM","LorCoeff_Err","A_Err","x0_Err","FWHM_Err"]
     precision = np.longdouble
     preFix = "AztimuthalIntegration"
-    readFunction = [XRayDetectorDataParser.loadDetectorFileRaw]
+    readFunction = XRayDetectorDataParser.loadDetectorFileRaw
     saveFunctions = [CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory]
     units = [{"FilePath":"string","azimAngle":"°"}| {"LorCoeff":"unknown","A":"xray count","x0":"°","FWHM":"unknown","LorCoeff_Err":"unknown","A_Err":"xray count","x0_Err":"°","FWHM_Err":"unkown"}]
     
 class VoigtFitTask_Config():
     filenamePrefix = "PseudoVoigt_data_"
-    taskName = "pseudoVoigt_fit"
+    taskName = "voigt_fit"
     description = "Does things"
     dependencies = {AzimuthalIntegrationTask_Config.taskName :1}
     paramsToExport = ["FilePath,Azim,LorCoeff","A","x0","FWHM","LorCoeff_Err","A_Err","x0_Err","FWHM_Err"]
     precision = np.longdouble
     preFix = "VoigtFit"
-    readFunction = [XRayDetectorDataParser.loadAzimuthalIntegrationDataFile]
+    readFunction = XRayDetectorDataParser.loadAzimuthalIntegrationDataFile
     saveFunctions = [CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory]
     units = [{"FilePath":"string","azimAngle":"°"}| {"LorCoeff":"unknown","A":"xray count","x0":"°","FWHM":"unknown","LorCoeff_Err":"unknown","A_Err":"xray count","x0_Err":"°","FWHM_Err":"unkown"}]
 
@@ -31,7 +31,7 @@ class AxisTransformFitTask_Config():
     description = "Does things"
     dependencies = {VoigtFitTask_Config.taskName:1}
     precision = np.longdouble
-    readFunction = [PickleParser.loadPickle_eachDirectory]
+    readFunction = PickleParser.loadPickle_eachDirectory
     saveFunctions=[CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory]
     lambdaFileNr = lambda path: path[-9:-4]
     lambdaDirectoryNr = lambda path: path[-15:-10]

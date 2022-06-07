@@ -16,12 +16,13 @@ class SearchUtils:
     def getDirectory(filePath):
         return os.path.split(filePath)[0]
 
-    def getFilesThatEndwith(path, fileType):
+    def getFilesThatEndwith(path, fileTypes):
         graph = []
         for files in os.walk(path):
             for file in files[2]:
-                if(file.lower().endswith(fileType)):
-                        graph.append(path+"/"+file)
+                for fileType in fileTypes:
+                    if(file.lower().endswith(fileType)):
+                            graph.append(path+"/"+file)
         return graph
     def getResultDirectory(overwrite,toFind,directory,fileName, newRUN = True):
         idx = directory.find(toFind)
@@ -29,7 +30,7 @@ class SearchUtils:
         runNr = 0
         run_resDirectory = resDirectory + "Run" + f"{runNr:03}"
         
-        if(os.path.exists(run_resDirectory+"/") or not newRUN):
+        if(os.path.exists(run_resDirectory+"/"+fileName) or not newRUN):
             return run_resDirectory
         
         elif(not overwrite and newRUN):

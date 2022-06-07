@@ -19,4 +19,4 @@ def loadAzimuthalIntegrationDataFile(params):
     return data
     
 def getAllowedFormats():
-    return "cbf"
+    return [".cbf",".tif"]

@@ -1,5 +1,6 @@
-from Config.Config import TaskConfigs
-from IO.IO_Utils import SearchUtils, IO
+from statistics import mode
+from Tasks.Config import TaskConfigs
+from IO.IO_Utils import SearchUtils
 
 
 from queue import Empty
@@ -27,11 +28,11 @@ class AxisTransformFit:
 
     def poly1(x,a, b, c):
         return a*x+b
-    def doFit(azimuthalAngles,x0,x0_err,d0,wavelength,E,poisson,strainYY,strainZZ,strainYZ):
+    def doFit(azimuthalAngles,x0,x0_err,d0,wavelength):
         trashData_count = np.count_nonzero([(np.array(x0)/np.array(x0_err)) <= 0.01])
                 
         if(trashData_count < len(azimuthalAngles)-6):
-            strain = ((wavelength/(2*np.sin((x0/2)*np.pi/180)))-d0)/d0
+            strain = ((wavelength/(2*np.sin((x0/2)*np.pi/180)))-d0)/d0 #see brag eq
             par = curve_fit(AxisTransformFit.poly1,np.sin(azimuthalAngles*np.pi/180)**2,strain)[0]
             initialGuess = [par[0]+par[1],par[1],0]
 
@@ -59,20 +60,29 @@ class AxisTransformFit:
             return {"stressXX":stressxx,"stressYY":stressyy,"stressYZ":stressyz,"stressHydro":stresshydro,"stressMises":stressmises}
 class AxisTransformationTask(Task):
     
+    def runTask():
+        pass
+    def getDescription():
+        pass
+    def getFuncName():
+        return TaskConfigs.AxisTransformFitTask_Config.taskName
+    def getDependencies():
+        pass
+    def getInputParams():
+        pass
+        
+    
     def doAxisTransformation(q,params):
         while(True):
             try:
-                directory,file = q.get(timeout=1)
+                file = q.get(timeout=1)
                 #if(funcRet["azimuthal_integration"] == None or azimFile not in set(funcRet["azimuthal_integration"])):
                 try:
-                    pseudoFitData =  params["funcRet"]["pseudoVoigt_fit"][file]
+                    pseudoFitData =  params["funcRet"][TaskConfigs.VoigtFitTask_Config.taskName][file]
                 except KeyError or TypeError:
                     pseudoFitData = params["reqFiles"][file]
                     
-                azimuthalAngles,x0,x0_err= np.array([pseudoFitData[i]["azimAngle"] for i in range(len(pseudoFitData))]),np.array([pseudoFitData[i]["x0"] for i in range(len(pseudoFitData))]),np.array([pseudoFitData[i]["x0_Err"] for i in range(len(pseudoFitData))])
-                
-
-                
+                azimuthalAngles,x0,x0_err= np.array([pseudoFitData[i]["azimAngle"] for i in range(len(pseudoFitData))]),np.array([TaskConfigs.AxisTransformFitTask_Config.precision(pseudoFitData[i]["x0"]) for i in range(len(pseudoFitData))]),np.array([pseudoFitData[i]["x0_Err"] for i in range(len(pseudoFitData))])
                 
                 fitData = AxisTransformFit.doFit(azimuthalAngles=azimuthalAngles,x0=x0,x0_err=x0_err,d0=params["d0"],wavelength=TaskConfigs.AxisTransformFitTask_Config.precision(params["wavelength"]))
 
@@ -97,9 +107,9 @@ class AxisTransformationTask(Task):
         reqFiles = {}
         for path in directoryPaths:
             for file in SearchUtils.getFilesThatEndwith(path,".cbf"):
-                queue.put([SearchUtils.getDirectory(file),file])
-                if(not TaskConfigs.VoigtFit_Config.taskName in funcRet.keys() and not SearchUtils.getDirectory(file) in set(reqFiles)):
-                    params  = {"file":file,"prefix":TaskConfigs.VoigtFit_Config.preFix}
+                queue.put(file)
+                if(not TaskConfigs.VoigtFitTask_Config.taskName in funcRet.keys() and not SearchUtils.getDirectory(file) in set(reqFiles)):
+                    params  = {"file":file,"prefix":TaskConfigs.VoigtFitTask_Config.preFix}
                     reqFiles =  reqFiles | TaskConfigs.AxisTransformFitTask_Config.readFunction(params)
         return reqFiles
     
@@ -133,10 +143,11 @@ class AxisTransformationTask(Task):
         logger.info("Finished Task in %ss"%(str(time.time()-startExecTime))) 
         
         results = dict(params["returnVal"])
-        params = {"dict": results,"prefix":TaskConfigs.AxisTransformFitTask_Config.preFix,"precision":TaskConfigs.AxisTransformFitTask_Config.precision}
-        for saveDict in TaskConfigs.AxisTransformFitTask_Config.modes:
+        params = {"dict": results,"prefix":TaskConfigs.AxisTransformFitTask_Config.preFix,"precision":TaskConfigs.AxisTransformFitTask_Config.precision,"overwrite":False}
+        for saveDict in TaskConfigs.AxisTransformFitTask_Config.saveFunctions:
             saveDict(params)  
             
             
         del(m)
         return results
+    
