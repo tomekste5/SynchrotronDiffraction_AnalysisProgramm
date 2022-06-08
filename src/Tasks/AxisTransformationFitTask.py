@@ -15,6 +15,7 @@ from Tasks.Task import Task
 import numpy as np
 
 from scipy.optimize import curve_fit
+from Multiprocessing.Pool import Pool
 
 
 class AxisTransformFit:
@@ -113,11 +114,11 @@ class AxisTransformationTask(Task):
                     reqFiles =  reqFiles | TaskConfigs.AxisTransformFitTask_Config.readFunction(params)
         return reqFiles
     
-    def runTask(minTheta,directoryPaths,isMultiProcessingAllowed,wavelength,peak,E,Possions,d0,Z_positions,Y_positions,handles,funcRet):
+    def runTask(minTheta,directoryPaths,isMultiProcessingAllowed,wavelength,peak,E,Possions,d0,Z_positions,Y_positions,handles,pool: Pool,funcRet):
         startExecTime = time.time() 
                 
-        m = mp.Manager()
-        logger = mp.log_to_stderr()
+        m = pool.getManager()
+        logger = pool.getLogger()
         logger.setLevel(logging.INFO)
                 
         processQueue = m.Queue()

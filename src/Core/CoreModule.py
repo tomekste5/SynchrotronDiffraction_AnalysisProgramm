@@ -1,6 +1,7 @@
 import time
 
 from Core.CoreModuleRegister import *
+from Multiprocessing.Pool import Pool
 taskRegister = TaskRegister.taskRegister
 
 class Queue:
@@ -38,8 +39,7 @@ class Queue:
             [x for _, x in sorted(zip([0], taskNames))]
             return  [task for _, task in sorted(zip([0], taskNames),reverse=True)]
     
-    def parseTasks(self,guiParams):
-        taskIdentifiers = guiParams.getTasks()
+    def parseTasks(self,params,pool,taskIdentifiers):
         tasks = self.getTasks(taskRegister,taskIdentifiers)
         excOrder = self.getTaskPriority(tasks)
         for taskID in excOrder:
@@ -49,13 +49,15 @@ class Queue:
             else:
                 dependencies = [dependency for dependency in dependencies if (dependencies[dependency] and dependency in set(tasks))]
             
-            comp = [func(guiParams) for func in tasks[taskID]["input_params"]]
+            comp = [func(params) for func in tasks[taskID]["input_params"]]
+            if(tasks[taskID]["logging"]):
+                comp.append(pool["pool"])
             tasks[taskID]["input_params"] = comp
             tasks[taskID]["dependencies"] = dependencies
         return tasks,excOrder
     
-    def addTasks(self,params):
-        self.__taskQueue = self.parseTasks(params)
+    def addTasks(self,params,pool,tasks):
+        self.__taskQueue = self.parseTasks(params,pool,tasks)
     def run(self):
         startExecTime = time.time() 
         for taskName in  self.__taskQueue[1]:
@@ -75,7 +77,8 @@ class Core:
 
     def __init__(self):
         self.__guiParams = Param()
-        self.__gui =  GUI_DummyModule.GUI()
+        self.__pool = Pool(3)
+        #self.__gui =  GUI.GUI()
         
     def getSelfInstance(self):
         return self
@@ -83,7 +86,7 @@ class Core:
         
     def run(self):
         taskQueue = Queue()
-        taskQueue.addTasks(params=self.__guiParams)
+        taskQueue.addTasks(params=self.__guiParams ,pool={"pool":self.__pool},tasks=self.__guiParams.getTasks())
         
         taskQueue.run()
         

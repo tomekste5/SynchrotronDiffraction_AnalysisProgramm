@@ -11,6 +11,7 @@ from Tasks.Config import TaskConfigs
 from IO.IO_Utils import SearchUtils
 from Tasks.Task import Task
 from IO.Parser import XRayDetectorDataParser
+from Multiprocessing.Pool import Pool
 
 #make config struct
 
@@ -70,11 +71,12 @@ class VoigtFitTask(Task):
             for filePath in SearchUtils.getFilesThatEndwith(path,XRayDetectorDataParser.getAllowedFormats()):
                 queue.put(filePath)
     
-    def runTask(minTheta,maxTheta,directoryPaths,isMultiProcessingAllowed,thetaAV,peak,mode,handles,funcRet):
+    def runTask(minTheta,maxTheta,directoryPaths,isMultiProcessingAllowed,thetaAV,peak,mode,handles,pool: Pool,funcRet):
             startExecTime = time.time() 
             
-            m = mp.Manager()
-            logger = mp.log_to_stderr()
+            m = pool.getManager()
+            
+            logger = pool.getLogger()
             logger.setLevel(logging.INFO)
             queue = m.Queue()
             

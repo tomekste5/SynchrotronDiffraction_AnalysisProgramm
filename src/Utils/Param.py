@@ -60,7 +60,7 @@ class Param():
         self.__directoryPaths = [i+"pilatus\\" for i in glob("F:/NextCloud/University/2. FS/EDV/Versuch3/Versuch3/*/", recursive = True) if "v3_insitu" in i]
         self.__azimJsonPath = "insitu20x200.azimint.json"
         self.__progressBarHandles = []
-        self.__tasks = ["axisTransform_fit","voigt_fit"]#"azimuthal_integration" "pseudoVoigt_fit" ["azimuthal_integration"]["pseudoVoigt_fit"]
+        self.__tasks = ["azimuthal_integration"]#"axisTransform_fit","voigt_fit""azimuthal_integration" "pseudoVoigt_fit" ["azimuthal_integration"]["pseudoVoigt_fit"]
     #Setter
     def setMode(self, mode):
         self.__mode = mode
@@ -146,13 +146,3 @@ class Param():
         return self.__azimJsonPath
     def getProgressBarHandles(self):
         return self.__progressBarHandles 
-        
-    
-    #ignore
-    ParamRegister = {
-        "EModules":getEModules,
-        "PoissonNumbers": getPoissonNumber,
-        "PositionsX":getPositionsZ,
-        "PositionsY":getPositionsY
-    }
-    

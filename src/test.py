@@ -32,3 +32,5 @@ def task_with_multiple_params(a, b):
 print('Using function with multiple parameters:')
 for s in fast_map(task_with_multiple_params, ['apple', 'banana', 'cherry'], ['orange', 'lemon', 'pineapple']):
     print(s)
+    
+    
