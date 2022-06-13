@@ -2,16 +2,15 @@ import os
 import pickle
 import re
 
-from IO.IO_Utils import SearchUtils
+from IO import IO_Utils
 
 eachDirectoryPickle_FileName = -2
 
 def writePickle_single(params):
     
-    paramsCpy = params.copy()
-    dictionary = paramsCpy["dict"]
-    overwrite = paramsCpy["overwrite"]
-    filePrefix = paramsCpy["prefix"]
+    dictionary = params["dict"]
+    overwrite = params["overwrite"]
+    filePrefix = params["prefix"]
     
     
     directoryPath_parsed = list(dictionary.keys())[1].replace("\\", "/").replace("//","/")
@@ -19,26 +18,25 @@ def writePickle_single(params):
     
     fileName ="".join(re.split("_",toFind)[0:-1])+"_"+filePrefix+".pickle"
     
-    path  = SearchUtils.getResultDirectory(overwrite,toFind,directoryPath_parsed,fileName,True)
+    path  = IO_Utils.getPathToResultDirectory(overwrite,toFind,directoryPath_parsed,fileName)
 
     filePath = path+"/"+fileName
     pickle.dump(dictionary,open(filePath, "wb"))
     
 def writePickle_eachDirectory(params):
-    paramsCpy = params.copy()
         
-    filePrefix = paramsCpy["prefix"]
-    dictionary = paramsCpy["dict"]
-    overwrite = paramsCpy["overwrite"]
+    filePrefix = params["prefix"]
+    dictionary = params["dict"]
+    overwrite = params["overwrite"]
     sortedKeys = sorted(dictionary)
     
-    currentDirectory = SearchUtils.getDirectory(sortedKeys[0])
+    currentDirectory = IO_Utils.getDirectory(sortedKeys[0])
     
     
     dictToPickle = {}
     
     for file in sortedKeys:
-        if(currentDirectory not in file):
+        if(currentDirectory not in file and file != "units" and file != "precision"):
             directory_parsed = currentDirectory.replace("\\", "/").replace("//","/")
             
             fileName = re.split("\\ |\/ |/",directory_parsed)[eachDirectoryPickle_FileName]+"_"+filePrefix+".pickle"
@@ -48,8 +46,16 @@ def writePickle_eachDirectory(params):
             if(not os.path.exists(filePath) or overwrite):
                 pickle.dump(dictToPickle,open(filePath, "wb"))
                 
-            currentDirectory = SearchUtils.getDirectory(file)
+            currentDirectory = IO_Utils.getDirectory(file)
             dictToPickle = {}
+            
+            if("units" in set(dictionary)):
+                dictToPickle["units"] =  dictionary["units"]
+        
+            if("precision" in set(dictionary)):
+                dictToPickle["precision"] =  dictionary["precision"]
+
+            
             
         dictToPickle[file] = dictionary[file]
         
@@ -62,12 +68,11 @@ def writePickle_eachDirectory(params):
     if(not os.path.exists(filePath) or overwrite):
         pickle.dump(dictToPickle,open(filePath, "wb"))
         
-def loadPickle_eachDirectory(params):
-        paramsCpy = params.copy()
-        filePrefix = paramsCpy["prefix"]
-        filePath = paramsCpy["file"]
+def loadPickle(params):
+        filePrefix = params["prefix"]
+        filePath = params["file"]
         
-        directory = SearchUtils.getDirectory(filePath)
+        directory = IO_Utils.getDirectory(filePath)
         directory = directory.replace("\\", "/").replace("\\","/")
         
         filename = re.split("\\ |\/ |/",directory)[eachDirectoryPickle_FileName]

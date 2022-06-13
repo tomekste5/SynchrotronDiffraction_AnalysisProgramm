@@ -1,6 +1,7 @@
 from statistics import mode
+import wave
 from Tasks.Config import TaskConfigs
-from IO.IO_Utils import SearchUtils
+from IO import IO_Utils
 
 
 from queue import Empty
@@ -42,23 +43,23 @@ class AxisTransformFit:
 
 
                     
-            return {"strainYY":normalStrains[0],"strainZZ":normalStrains[1],"strainYZ":normalStrains[2],"strainYY_Err":normalStrains_err[0],"strainZZ_Err":normalStrains_err[1],"strainYZ_Err":normalStrains_err[2]}
+            return {"strainXX":normalStrains[0],"strainZZ":normalStrains[1],"strainXZ":normalStrains[2],"strainXX_Err":normalStrains_err[0],"strainZZ_Err":normalStrains_err[1],"strainXZ_Err":normalStrains_err[2]}
         else:
-            return {"strainYY":0,"strainZZ":0,"strainYZ":0,"strainYY_Err":0,"strainZZ_Err":0,"strainYZ_Err":0}
+            return {"strainXX":0,"strainZZ":0,"strainXZ":0,"strainXX_Err":0,"strainZZ_Err":0,"strainXZ_Err":0}
     def getPrincipalStresses(E,poisson,strainYY,strainZZ,strainYZ):
 
-            stressyy=(E/((1+poisson)*(1-2*poisson)))*((1-poisson)*strainYY)+(E/((1+poisson)*(1-2*poisson)))*((poisson)*strainZZ)+(E/((1+poisson)*(1-2*poisson)))*((poisson)*0)
+            stressxx=(E/((1+poisson)*(1-2*poisson)))*((1-poisson)*strainYY)+(E/((1+poisson)*(1-2*poisson)))*((poisson)*strainZZ)+(E/((1+poisson)*(1-2*poisson)))*((poisson)*0)
             stresszz=(E/((1+poisson)*(1-2*poisson)))*((1-poisson)*strainZZ)+(E/((1+poisson)*(1-2*poisson)))*((poisson)*strainYY)+(E/((1+poisson)*(1-2*poisson)))*((poisson)*0)
-            stressyz=(E/((1+poisson)*(1-2*poisson)))*((1-2*poisson)*strainYZ)
+            stressxz=(E/((1+poisson)*(1-2*poisson)))*((1-2*poisson)*strainYZ)
 
 
             stressxx=(E/((1+poisson)*(1-2*poisson)))*((1-poisson)*0)+(E/((1+poisson)*(1-2*poisson)))*((poisson)*strainZZ)+(E/((1+poisson)*(1-2*poisson)))*((poisson)*strainYY)
 
-            stressmises=np.sqrt((1/2)*((stressxx-stressyy)**2+(stressyy-stresszz)**2+(stresszz-stressxx)**2+6*stressyz**2))
+            stressmises=np.sqrt((1/2)*((stressxx-stressxx)**2+(stressxx-stresszz)**2+(stresszz-stressxx)**2+6*stressxz**2))
 
-            stresshydro=(stressxx+stressyy+stresszz)/3
+            stresshydro=(stressxx+stressxx+stresszz)/3
 
-            return {"stressXX":stressxx,"stressYY":stressyy,"stressYZ":stressyz,"stressHydro":stresshydro,"stressMises":stressmises}
+            return {"stressXX":stressxx,"stressZZ":stressxx,"stressXZ":stressxz,"stressHydro":stresshydro,"stressMises":stressmises}
 class AxisTransformationTask(Task):
     
     def runTask():
@@ -73,82 +74,85 @@ class AxisTransformationTask(Task):
         pass
         
     
-    def doAxisTransformation(q,params):
-        while(True):
-            try:
-                file = q.get(timeout=1)
-                #if(funcRet["azimuthal_integration"] == None or azimFile not in set(funcRet["azimuthal_integration"])):
-                try:
-                    pseudoFitData =  params["funcRet"][TaskConfigs.VoigtFitTask_Config.taskName][file]
-                except KeyError or TypeError:
-                    pseudoFitData = params["reqFiles"][file]
-                    
-                azimuthalAngles,x0,x0_err= np.array([pseudoFitData[i]["azimAngle"] for i in range(len(pseudoFitData))]),np.array([TaskConfigs.AxisTransformFitTask_Config.precision(pseudoFitData[i]["x0"]) for i in range(len(pseudoFitData))]),np.array([pseudoFitData[i]["x0_Err"] for i in range(len(pseudoFitData))])
-                
-                fitData = AxisTransformFit.doFit(azimuthalAngles=azimuthalAngles,x0=x0,x0_err=x0_err,d0=params["d0"],wavelength=TaskConfigs.AxisTransformFitTask_Config.precision(params["wavelength"]))
+    def doAxisTransformation(callParams):
+        file, params, voigtFitData= callParams
+        try:
+            azimuthalAngles,x0,x0_err= np.array([voigtFitData[i]["azimAngle"] for i in range(len(voigtFitData))]),np.array([TaskConfigs.AxisTransformFitTask_Config.precision(voigtFitData[i]["x0"]) for i in range(len(voigtFitData))]),np.array([voigtFitData[i]["x0_Err"] for i in range(len(voigtFitData))])
+            
+            fitData = AxisTransformFit.doFit(azimuthalAngles=azimuthalAngles,x0=x0,x0_err=x0_err,d0=params["d0"],wavelength=TaskConfigs.AxisTransformFitTask_Config.precision(params["wavelength"]))
 
-                E=params["dxxxE"]
-                poisson=params["dxxxP"]
+            E=params["E_Modules"]
+            poisson=params["Possion_Numbers"]
 
-                strainYY = fitData["strainYY"]
-                strainZZ = fitData["strainZZ"]
-                strainYZ = fitData["strainYZ"]
+            strainXX = fitData["strainXX"]
+            strainZZ = fitData["strainZZ"]
+            strainXZ = fitData["strainXZ"]
 
-                principalStresses = AxisTransformFit.getPrincipalStresses(E=E,poisson=poisson,strainYY=strainYY,strainZZ=strainZZ,strainYZ=strainYZ)                
-                
-                params["returnVal"][file] = [{"File":file,"Z_positions":params["Z_positions"][int(TaskConfigs.AxisTransformFitTask_Config.lambdaFileNr(file))-1],"Y_positions":params["Y_positions"][int(TaskConfigs.AxisTransformFitTask_Config.lambdaDirectoryNr(file))-1]}| fitData |principalStresses| {"FWHM":np.mean(np.array([pseudoFitData[i]["FWHM"] for i in range(len(pseudoFitData))])),"A":np.mean(np.array([pseudoFitData[i]["A"] for i in range(len(pseudoFitData))]))}]
-     
-                params["logger"].info("Fitted File: " + file)
-            except Empty:
-                break
-            except FileNotFoundError:
-                params["logger"].error("FileNotFoundError: No such file or directory: " +file)   
+            principalStresses = AxisTransformFit.getPrincipalStresses(E=E,poisson=poisson,strainYY=strainXX,strainZZ=strainZZ,strainYZ=strainXZ)                
+            
+            params["returnVal"][file] = [{"File":file,"Z_positions":params["Z_positions"][int(TaskConfigs.AxisTransformFitTask_Config.lambdaFileNr(file))-1],"X_positions":params["X_positions"][int(TaskConfigs.AxisTransformFitTask_Config.lambdaDirectoryNr(file))-1]}| fitData |principalStresses| {"FWHM":np.mean(np.array([voigtFitData[i]["FWHM"] for i in range(len(voigtFitData))])),"A":np.mean(np.array([voigtFitData[i]["A"] for i in range(len(voigtFitData))])),"x0":np.mean(np.array([voigtFitData[i]["x0"] for i in range(len(voigtFitData))]))}]
     
-    def fillQueue(funcRet,directoryPaths,mode,queue):
+            params["logger"].info("Fitted File: " + file)
+        except Empty:
+            pass
+        except FileNotFoundError:
+            params["logger"].error("FileNotFoundError: No such file or directory: " +file)   
+    
+    def fillQueue(funcRet,dataPaths,queue,params):
+        nrOfTasks = 0
         reqFiles = {}
-        for path in directoryPaths:
-            for file in SearchUtils.getFilesThatEndwith(path,".cbf"):
-                queue.put(file)
-                if(not TaskConfigs.VoigtFitTask_Config.taskName in funcRet.keys() and not SearchUtils.getDirectory(file) in set(reqFiles)):
-                    params  = {"file":file,"prefix":TaskConfigs.VoigtFitTask_Config.preFix}
-                    reqFiles =  reqFiles | TaskConfigs.AxisTransformFitTask_Config.readFunction(params)
-        return reqFiles
+        for path in dataPaths:
+            for file in IO_Utils.getFilesThatEndwith(path,".cbf"):
+                if(not TaskConfigs.VoigtFitTask_Config.taskName in funcRet.keys() and not IO_Utils.getDirectory(file) in set(reqFiles)):
+                    read_params  = {"file":file,"prefix":TaskConfigs.VoigtFitTask_Config.preFix}
+                    reqFiles =  reqFiles | TaskConfigs.AxisTransformFitTask_Config.readFunction(read_params)
+                if(TaskConfigs.VoigtFitTask_Config.taskName in funcRet.keys() and file in funcRet[TaskConfigs.VoigtFitTask_Config.taskName].keys()):
+                    queue.put([AxisTransformationTask.doAxisTransformation,[file,params, funcRet[TaskConfigs.VoigtFitTask_Config.taskName][file]]])
+                else:
+                    queue.put([AxisTransformationTask.doAxisTransformation,[file,params, reqFiles[file]]])
+                    print(file)
+                nrOfTasks +=1
+        return nrOfTasks
     
-    def runTask(minTheta,directoryPaths,isMultiProcessingAllowed,wavelength,peak,E,Possions,d0,Z_positions,Y_positions,handles,pool: Pool,funcRet):
-        startExecTime = time.time() 
-                
-        m = pool.getManager()
-        logger = pool.getLogger()
-        logger.setLevel(logging.INFO)
-                
-        processQueue = m.Queue()
-
-        reqFiles = AxisTransformationTask.fillQueue(funcRet,directoryPaths,1,processQueue)
-            
-        params = m.dict({"reqFiles":reqFiles,"logger":logger,"returnVal":m.dict({"units":TaskConfigs.AxisTransformFitTask_Config.units}),"funcRet":funcRet,"d0":d0,"wavelength":wavelength,"Z_positions":Z_positions,"Y_positions":Y_positions,"dxxxE":E[peak],"dxxxP":Possions[peak]})
-                
-        numberOfProcesses = mp.cpu_count()-1 if isMultiProcessingAllowed else 1
-                
-                
-        workerProcesses = [] 
-        for i in range(0,numberOfProcesses):
-            workerP = Process(target=AxisTransformationTask.doAxisTransformation, args = (processQueue,params))
-            workerP.daemon = True
-            workerP.start()  # Launch reader_p() as another proc
-            workerProcesses.append(workerP)
-                
-        for process in workerProcesses:
-            process.join()
-            
-            
-        logger.info("Finished Task in %ss"%(str(time.time()-startExecTime))) 
+    def runTask(minTheta,dataPaths,wavelength,peak,E,Possions,d0,Z_positions,X_positions,handles: list,pool: Pool,funcRet: dict):
         
-        results = dict(params["returnVal"])
-        params = {"dict": results,"prefix":TaskConfigs.AxisTransformFitTask_Config.preFix,"precision":TaskConfigs.AxisTransformFitTask_Config.precision,"overwrite":False}
+        execStart_time = time.time() 
+        
+        #get logger which is used by the manager
+        logger = pool.getLogger()
+        #settings up the logger filter (INFO,WARNING,ERROR)
+        logger.setLevel(TaskConfigs.AxisTransformFitTask_Config.loggingLevel)
+                
+        logger.info("Starting Task %s..."%(TaskConfigs.AxisTransformFitTask_Config.taskName))
+        
+        m = pool.getManager()
+                
+        processQueue =pool.getQueue()
+        
+        params = m.dict({"logger":logger,"returnVal":m.dict({"units":TaskConfigs.AxisTransformFitTask_Config.units,
+                                                             "settings":{"wavelength":wavelength,"E-Modules":E,"possions":Possions,"d0":d0}})
+                         ,"d0":d0,"wavelength":wavelength,"Z_positions":Z_positions,"X_positions":X_positions,"E_Modules":E[peak],"Possion_Numbers":Possions[peak]})
+
+        #To ensure processing doesnt start while filling the Queue (could result in blocking each other, so low speed)
+        pool.idle()
+        nrOfTasks = AxisTransformationTask.fillQueue(funcRet,dataPaths,processQueue,params)
+        
+        #release the worker processes to start processing the jobs
+        pool.start()
+        
+        while(len(params["returnVal"].keys()) < nrOfTasks):
+            time.sleep(1)
+            logger.info("Reporting progress:    "+str(((len(params["returnVal"].keys())/(nrOfTasks+1) *100)))+ "%")
+            #handles[0].set((len(params["returnVal"].keys())/(nrOfTasks+1) *100))
+            
+        
+        AxisTransformationFit_results =dict(sorted(params["returnVal"].items()))
+        
+        save_Params = {"dict": AxisTransformationFit_results,"prefix":TaskConfigs.AxisTransformFitTask_Config.preFix,"precision":TaskConfigs.AxisTransformFitTask_Config.precision,"overwrite":False}
         for saveDict in TaskConfigs.AxisTransformFitTask_Config.saveFunctions:
-            saveDict(params)  
+            saveDict(save_Params)  
             
-            
-        del(m)
-        return results
+        logger.info("Finished Task in %ss"%(str(time.time()-execStart_time)))
+        
+        return AxisTransformationFit_results
     

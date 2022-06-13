@@ -5,11 +5,14 @@ import time
 # Meaning that using threading.Lock objects inside it may
 # lead to a deadlock if the default process creating method
 # happens to be "fork" (instead of "spawn" or "forkserver")
+
+
 def io_and_cpu_expensive_function(x):
     time.sleep(1)
     for i in range(10 ** 4):
         pass
     return x*x
+
 
 print('Unlimited threads (threads_count = number of tasks)')
 # 8 threads in total will be used.
@@ -29,8 +32,7 @@ print('\n')
 def task_with_multiple_params(a, b):
     return a + ' - ' + b
 
+
 print('Using function with multiple parameters:')
 for s in fast_map(task_with_multiple_params, ['apple', 'banana', 'cherry'], ['orange', 'lemon', 'pineapple']):
     print(s)
-    
-    

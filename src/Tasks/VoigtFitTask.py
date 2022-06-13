@@ -8,7 +8,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 from Tasks.Config import TaskConfigs
-from IO.IO_Utils import SearchUtils
+from IO import IO_Utils
 from Tasks.Task import Task
 from IO.Parser import XRayDetectorDataParser
 from Multiprocessing.Pool import Pool
@@ -39,72 +39,74 @@ class VoigtFitTask(Task):
         return TaskConfigs.VoigtFitTask_Config.dependencies
     
                     
-    def doPseudoVoigtFitting(q,params):
-        while(True):
-            try:
-                azimIntegrationData = []
-                path = q.get(timeout=1)
-                #if(funcRet["azimuthal_integration"] == None or azimFile not in set(funcRet["azimuthal_integration"])):
-                try:
-                    azimIntegrationData =  params["funcRet"]["azimuthal_integration"][path]
-                except KeyError or TypeError:
-                    readParams = {"path":path.replace(path.split(".")[-1],"azim"), "precision":TaskConfigs.VoigtFitTask_Config.precision}
-                    azimIntegrationData =TaskConfigs.VoigtFitTask_Config.readFunction(readParams)
+    def doPseudoVoigtFitting(callParams):
+        path,params,data = callParams
+        try:
+            if(data != None):
+                azimIntegrationData =  data
+            else:
+                readParams = {"path":path.replace(path.split(".")[-1],"azim"), "precision":TaskConfigs.VoigtFitTask_Config.precision}
+                azimIntegrationData =TaskConfigs.VoigtFitTask_Config.readFunction(readParams)
+            
+            interval = (azimIntegrationData[1] < params["maxTheta"]) & (params["minTheta"] <azimIntegrationData[1])
+            fitData = []
+            for azimAngle in range(len(azimIntegrationData[0])):  
+                input_data = [azimIntegrationData[0][azimAngle][interval],azimIntegrationData[1][interval]]
+                azimAngle = TaskConfigs.VoigtFitTask_Config.precision(np.round(azimIntegrationData[2][azimAngle]))
+                fitData.append({"FilePath":path.replace(path.split(".")[-1],"cbf"),"azimAngle":azimAngle} | VoigtFit.doFit(input_data[0],input_data[1],params["thetaPeak"]))
                 
-                interval = (azimIntegrationData[1] < params["maxTheta"]) & (params["minTheta"] <azimIntegrationData[1])
-                fitData = []
-                for azimAngleIdx in range(len(azimIntegrationData[0])):  
-                    input_data = [azimIntegrationData[0][azimAngleIdx][interval],azimIntegrationData[1][interval]]
-                    azimAngle = TaskConfigs.VoigtFitTask_Config.precision(np.round(azimIntegrationData[2][azimAngleIdx]))
-                    fitData.append({"FilePath":path.replace(path.split(".")[-1],"cbf"),"azimAngle":azimAngle} | VoigtFit.doFit(input_data[0],input_data[1],params["thetaPeak"]))
-                    
-                params["returnVal"][path]=fitData
-     
-                params["logger"].info("Fitted File: " + path)
-            except Empty:
-                break
-            except FileNotFoundError:
-                 params["logger"].error("FileNotFoundError: No such file or directory: " +path)   
-    #def 
-    def fillQueue(funcRet,directoryPaths,mode,queue):
-        for path in directoryPaths:
-            for filePath in SearchUtils.getFilesThatEndwith(path,XRayDetectorDataParser.getAllowedFormats()):
-                queue.put(filePath)
+            params["returnVal"][path]=fitData
     
-    def runTask(minTheta,maxTheta,directoryPaths,isMultiProcessingAllowed,thetaAV,peak,mode,handles,pool: Pool,funcRet):
-            startExecTime = time.time() 
-            
-            m = pool.getManager()
-            
-            logger = pool.getLogger()
-            logger.setLevel(logging.INFO)
-            queue = m.Queue()
-            
-            params = m.dict({"logger":logger,"funcRet":funcRet,"maxTheta":maxTheta,"minTheta":minTheta,"thetaPeak":thetaAV[peak],"returnVal":m.dict({"units":TaskConfigs.VoigtFitTask_Config.units})})
-            
-            VoigtFitTask.fillQueue(funcRet,directoryPaths,mode,queue)
+            params["logger"].info("Fitted File: " + path)
+        except Empty:
+            pass
+        except FileNotFoundError:
+                params["logger"].error("FileNotFoundError: No such file or directory: " +path)   
+    #def 
+    def fillQueue(funcRet,directoryPaths,queue,params):
+        nrOfTasks = 0
+        for path in directoryPaths:
+            for filePath in IO_Utils.getFilesThatEndwith(path,XRayDetectorDataParser.getAllowedFormats()):
+                if(nrOfTasks == 142):
+                    print("test")
+                try:
+                    queue.put([VoigtFitTask.doPseudoVoigtFitting, [filePath,params,funcRet[TaskConfigs.AzimuthalIntegrationTask_Config.taskName][filePath]]])
+                except KeyError:
+                    queue.put([VoigtFitTask.doPseudoVoigtFitting, [filePath,params,None]])
+                nrOfTasks +=1
+        return nrOfTasks
+    
+    def runTask(minTheta,maxTheta,directoryPaths: list,thetaAV,peak,handles: list,pool: Pool,funcRet: dict):
+        execTime_start = time.time() 
         
+        logger = pool.getLogger()
+        logger.setLevel(TaskConfigs.VoigtFitTask_Config.loggingLevel)
+        
+        logger.info("Starting Task %s..."%(TaskConfigs.VoigtFitTask_Config.taskName))
+        
+        m = pool.getManager()
+        queue = pool.getQueue()
+        
+        params = m.dict({"logger":logger,"maxTheta":maxTheta,"minTheta":minTheta,"thetaPeak":thetaAV[peak],"returnVal":m.dict({"units":TaskConfigs.VoigtFitTask_Config.units,
+                                                                                                                               "settings":{"minTheta":minTheta,"maxTheta":maxTheta,"peak":peak,"thetaAV":thetaAV}})})
+        
+        #To ensure processing doesnt start while filling the Queue (could result in blocking each other, so low speed)
+        pool.idle()
+        #Fill pool queue with jobs
+        nrOfTasks =  VoigtFitTask.fillQueue(funcRet,directoryPaths,queue,params)
+        #Release the worker processes to start processing the jobs
+        pool.start()
+        
+        while(len(params["returnVal"].keys()) < nrOfTasks):
+            time.sleep(1)
+            logger.info("Reporting progress:    "+str(((len(params["returnVal"].keys())/(nrOfTasks+1) *100)))+ "%")
+            #handles[0].set((len(params["returnVal"].keys())/(nrOfTasks+1) *100))
+        
+        voigtFit_results =dict(sorted(params["returnVal"].items()))
+        
+        save_params = {"dict": voigtFit_results,"prefix":TaskConfigs.VoigtFitTask_Config.preFix,"precision":TaskConfigs.VoigtFitTask_Config.precision,"overwrite":False}
+        for saveDict in TaskConfigs.VoigtFitTask_Config.saveFunctions:
+            saveDict(save_params)  
             
-            
-            numberOfProcesses = mp.cpu_count()-1 if isMultiProcessingAllowed else 1
-             
-            
-            workerProcesses = [] 
-            for i in range(0,numberOfProcesses):
-                workerP = Process(target=VoigtFitTask.doPseudoVoigtFitting, args = (queue,params))
-                workerP.daemon = True
-                workerP.start()  # Launch reader_p() as another proc
-                workerProcesses.append(workerP)
-            
-            for process in workerProcesses:
-                process.join()
-            
-            logger.info("Finished Task in %ss"%(str(time.time()-startExecTime))) 
-            results  =dict(params["returnVal"])
-            
-            params = {"dict": results,"prefix":TaskConfigs.VoigtFitTask_Config.preFix,"precision":TaskConfigs.VoigtFitTask_Config.precision,"overwrite":False}
-            for saveDict in TaskConfigs.VoigtFitTask_Config.saveFunctions:
-                saveDict(params)  
-                
-            del(m)
-            return results
+        logger.info("Finished Task in %ss"%(str(time.time()-execTime_start))) 
+        return voigtFit_results

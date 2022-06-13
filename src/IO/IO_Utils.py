@@ -1,46 +1,36 @@
-from fileinput import filename
-from cv2 import sort
-import fabio
 import os
-import pandas as pd
-from sympy import false, true
-import mmap
-import csv
-import numpy as np
-import pickle
-import bz2 
 import re
 import shutil
 
-class SearchUtils:
-    def getDirectory(filePath):
-        return os.path.split(filePath)[0]
 
-    def getFilesThatEndwith(path, fileTypes):
-        graph = []
-        for files in os.walk(path):
-            for file in files[2]:
-                for fileType in fileTypes:
-                    if(file.lower().endswith(fileType)):
-                            graph.append(path+"/"+file)
-        return graph
-    def getResultDirectory(overwrite,toFind,directory,fileName, newRUN = True):
-        idx = directory.find(toFind)
-        resDirectory = directory[:idx]+"".join(re.split("_",toFind)[0:-1])+"_Results_"
-        runNr = 0
-        run_resDirectory = resDirectory + "Run" + f"{runNr:03}"
-        
-        if(os.path.exists(run_resDirectory+"/"+fileName) or not newRUN):
-            return run_resDirectory
-        
-        elif(not overwrite and newRUN):
-            while(os.path.exists(run_resDirectory)):
-                run_resDirectory = resDirectory + ("Run"+f"{runNr:03}")
-                runNr +=1
-        else:
-            shutil.rmtree(resDirectory)     
-        os.makedirs(run_resDirectory)
+def getDirectory(filePath):
+    return os.path.split(filePath)[0]
+
+def getFilesThatEndwith(path, fileTypes):
+    graph = []
+    for files in  os.walk(path):
+        for file in files[2]:
+            for fileType in fileTypes:
+                if(file.lower().endswith(fileType)):
+                        graph.append(files[0]+"/"+file)
+    return path if os.path.isfile(path) else graph
+def getPathToResultDirectory(overwrite,toFind,directory,fileName, newRUN = True):
+    idx = directory.find(toFind)
+    resDirectory = directory[:idx]+"".join(re.split("_",toFind)[0:-1])+"_Results_"
+    runNr = 0
+    run_resDirectory = resDirectory + "Run_" + f"{runNr:03}"
+    
+    if((not os.path.isfile(run_resDirectory+"/"+fileName)) and os.path.exists(run_resDirectory)):
         return run_resDirectory
+    
+    elif(newRUN or os.path.exists(run_resDirectory)):
+        while(os.path.exists(run_resDirectory)):
+            run_resDirectory = resDirectory + ("Run_"+f"{runNr:03}")
+            runNr +=1
+    else:
+        shutil.rmtree(resDirectory)     
+    os.makedirs(run_resDirectory)
+    return run_resDirectory
 
 """
 class IO:

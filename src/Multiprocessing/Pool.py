@@ -45,7 +45,7 @@ class Pool():
         
         while (not killEvent.is_set()):
             try:
-                taskFunc,data = mainQueue.get_nowait()
+                taskFunc,data = mainQueue.get(timeout=0.01)
                 taskFunc(data)
             except Empty:
                 while(idle.is_set()):
@@ -64,6 +64,10 @@ class Pool():
     def idle(self):
         self.__idle.set()
     def start(self):
-        self.__idle.clear()
-        self.__mainQueue.join()        
+        self.__idle.clear()   
+    def shutdown(self):
+        self.__killEvent.set()
+        for wP in self.__workerProcesses:
+            wP.join()
+        self.__rootLogger.info("Shutting down...")
         
