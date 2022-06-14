@@ -110,7 +110,6 @@ class AxisTransformationTask(Task):
                     queue.put([AxisTransformationTask.doAxisTransformation,[file,params, funcRet[TaskConfigs.VoigtFitTask_Config.taskName][file]]])
                 else:
                     queue.put([AxisTransformationTask.doAxisTransformation,[file,params, reqFiles[file]]])
-                    print(file)
                 nrOfTasks +=1
         return nrOfTasks
     
@@ -130,7 +129,7 @@ class AxisTransformationTask(Task):
         processQueue =pool.getQueue()
         
         params = m.dict({"logger":logger,"returnVal":m.dict({"units":TaskConfigs.AxisTransformFitTask_Config.units,
-                                                             "settings":{"wavelength":wavelength,"E-Modules":E,"possions":Possions,"d0":d0}})
+                                                             "settings":[{"wavelength":wavelength,"E-Modules":E,"possions":Possions,"d0":d0}]})
                          ,"d0":d0,"wavelength":wavelength,"Z_positions":Z_positions,"X_positions":X_positions,"E_Modules":E[peak],"Possion_Numbers":Possions[peak]})
 
         #To ensure processing doesnt start while filling the Queue (could result in blocking each other, so low speed)

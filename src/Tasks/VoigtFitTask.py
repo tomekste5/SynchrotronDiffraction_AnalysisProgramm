@@ -88,7 +88,7 @@ class VoigtFitTask(Task):
         queue = pool.getQueue()
         
         params = m.dict({"logger":logger,"maxTheta":maxTheta,"minTheta":minTheta,"thetaPeak":thetaAV[peak],"returnVal":m.dict({"units":TaskConfigs.VoigtFitTask_Config.units,
-                                                                                                                               "settings":{"minTheta":minTheta,"maxTheta":maxTheta,"peak":peak,"thetaAV":thetaAV}})})
+                                                                                                                               "settings":[{"minTheta":minTheta,"maxTheta":maxTheta,"peak":peak,"thetaAV":thetaAV}]})})
         
         #To ensure processing doesnt start while filling the Queue (could result in blocking each other, so low speed)
         pool.idle()

@@ -36,7 +36,7 @@ def writePickle_eachDirectory(params):
     dictToPickle = {}
     
     for file in sortedKeys:
-        if(currentDirectory not in file and file != "units" and file != "precision"):
+        if(currentDirectory not in file and file != "units" and file != "settings"):
             directory_parsed = currentDirectory.replace("\\", "/").replace("//","/")
             
             fileName = re.split("\\ |\/ |/",directory_parsed)[eachDirectoryPickle_FileName]+"_"+filePrefix+".pickle"
@@ -52,8 +52,8 @@ def writePickle_eachDirectory(params):
             if("units" in set(dictionary)):
                 dictToPickle["units"] =  dictionary["units"]
         
-            if("precision" in set(dictionary)):
-                dictToPickle["precision"] =  dictionary["precision"]
+            if("settings" in set(dictionary)):
+                dictToPickle["settings"] =  dictionary["settings"]
 
             
             

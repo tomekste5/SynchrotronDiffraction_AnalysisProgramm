@@ -11,6 +11,7 @@ from IO import IO_Utils
 from Multiprocessing.Pool import Pool
 from Tasks.Task import Task
 from IO.Parser import XRayDetectorDataParser
+import json
 
 class AzimuthalIntegrator:
 
@@ -67,8 +68,8 @@ class AzimuthalIntegrationTask(Task):
             manager = pool.getManager()
             
             queue =  pool.getQueue()
-            params = manager.dict({"logger":logger,"azimIntegrator":azimIntegrator,"returnVal":manager.dict({"units":TaskConfigs.AzimuthalIntegrationTask_Config.units,
-                                                                                                             "settings":{"npt_rad":npt_rad,"npt_azim":npt_azim,"radial_range":radial_range,"pyFai_settings":settingJson}})})
+            settings = json.load(open(settingJson))
+            params = manager.dict({"logger":logger,"azimIntegrator":azimIntegrator,"returnVal":manager.dict({"units":TaskConfigs.AzimuthalIntegrationTask_Config.units,"settings":[{"pyFai_settings":settings}|{"npt_rad":npt_rad,"npt_azim":npt_azim,"radial_range":radial_range,"pyFai_settings":settingJson}]})})
             
             pool.idle()
             nrOfJobs =  AzimuthalIntegrationTask.fillQueue(dataPaths,queue,params)

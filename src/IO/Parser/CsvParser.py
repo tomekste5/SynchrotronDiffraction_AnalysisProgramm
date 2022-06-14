@@ -15,11 +15,11 @@ def writeCSV_single(params):
     
     if("units" in set(dictionary)):
         csvContent.extend(dictionary["units"])
-    if("precision" in set(dictionary)):
-        csvContent.extend(dictionary["precision"])
+    if("settings" in set(dictionary)):
+        csvContent.extend(dictionary["settings"])
 
     for file in dictionary:
-        if("units" != file and "precision" != file):
+        if("units" != file and "settings" != file):
             csvContent.extend(dictionary[file])
         
     directory = IO_Utils.getDirectory(list(dictionary.keys())[0]).replace("\\", "/").replace("\\","/")
@@ -41,12 +41,12 @@ def writeCSV_eachDirectory(params):
     if("units" in set(dictionary)):
         csvContent.extend(dictionary["units"])
         
-    if("precision" in set(dictionary)):
-        csvContent.extend(dictionary["precision"])
+    if("settings" in set(dictionary)):
+        csvContent.extend(dictionary["settings"])
 
     
     for file in sortedDict:
-        if("units" != file and "precision" != file):
+        if("units" != file and "settings" != file):
             if(currDirectory not in  file):
                 df = pd.DataFrame().from_records(csvContent,index=None)
                 directoryR = currDirectory.replace("\\", "/").replace("\\","/")
@@ -65,7 +65,7 @@ def writeCSV_eachDirectory(params):
                         +filename+".csv",index=False)
 def writeCSV_settings(params):
     settings = params["settings"]
-    
+    """
     directory = IO_Utils.getDirectory(list(dictionary.keys())[0]).replace("\\", "/").replace("\\","/")
     toFind = re.split("\\ |\/ |/",directory)[eachDirectoryCSV_FileName]
     fileName ="".join(re.split("_",toFind)[0:-1])+"_"+filePrefix+".csv"
@@ -76,6 +76,7 @@ def writeCSV_settings(params):
     
     df = pd.DataFrame().from_records(settings,index=None)
     df.to_csv(filePath)
+    """
 
 #Deprecated
 def writeCSV_eachFile(params):
