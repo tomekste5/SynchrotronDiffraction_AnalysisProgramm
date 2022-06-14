@@ -4,29 +4,28 @@ import re
 
 from IO import IO_Utils
 
-eachDirectoryCSV_FileName = -2
+experimnentStrIdx = -2
 
 def writeCSV_single(params):
     dictionary = params["dict"]
     overwrite = params["overwrite"]
     filePrefix = params["prefix"]
+    path = params["outputPath"]
     
     csvContent = list()
     
     if("units" in set(dictionary)):
         csvContent.extend(dictionary["units"])
+    """
     if("settings" in set(dictionary)):
         csvContent.extend(dictionary["settings"])
+    """
 
     for file in dictionary:
         if("units" != file and "settings" != file):
             csvContent.extend(dictionary[file])
-        
-    directory = IO_Utils.getDirectory(list(dictionary.keys())[0]).replace("\\", "/").replace("\\","/")
-    toFind = re.split("\\ |\/ |/",directory)[eachDirectoryCSV_FileName]
-    fileName ="".join(re.split("_",toFind)[0:-1])+"_"+filePrefix+".csv"
-    
-    path  = IO_Utils.getPathToResultDirectory(overwrite,toFind,directory,fileName)
+            
+    fileName =filePrefix+".csv"
     filePath = path +"/"+fileName   
     pd.DataFrame().from_records(csvContent,index=None).to_csv(filePath,index=False) 
         
@@ -41,8 +40,10 @@ def writeCSV_eachDirectory(params):
     if("units" in set(dictionary)):
         csvContent.extend(dictionary["units"])
         
+    """
     if("settings" in set(dictionary)):
         csvContent.extend(dictionary["settings"])
+    """
 
     
     for file in sortedDict:
@@ -50,7 +51,7 @@ def writeCSV_eachDirectory(params):
             if(currDirectory not in  file):
                 df = pd.DataFrame().from_records(csvContent,index=None)
                 directoryR = currDirectory.replace("\\", "/").replace("\\","/")
-                filename = re.split("\\ |\/ |/",directoryR)[eachDirectoryCSV_FileName] +"_"+ filePrefix
+                filename = re.split("\\ |\/ |/",directoryR)[experimnentStrIdx] +"_"+ filePrefix
                 df.to_csv(directoryR +"/"
                             +filename+".csv",index=False)
                 currDirectory = IO_Utils.getDirectory(file)
@@ -60,7 +61,7 @@ def writeCSV_eachDirectory(params):
             csvContent.extend(dictionary[file])
     df = pd.DataFrame().from_records(csvContent,index=None)
     directoryR = currDirectory.replace("\\", "/").replace("\\","/")
-    filename = re.split("\\ |\/ |/",directoryR)[eachDirectoryCSV_FileName] +"_"+ filePrefix
+    filename = re.split("\\ |\/ |/",directoryR)[experimnentStrIdx] +"_"+ filePrefix
     df.to_csv(directoryR +"/"
                         +filename+".csv",index=False)
 def writeCSV_settings(params):

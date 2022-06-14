@@ -60,7 +60,8 @@ class Param():
         self.__directoryPaths = [i for i in glob("F:/NextCloud/University/2. FS/EDV/Versuch3/Versuch3/*/", recursive = True) if "v3_insitu" in i]
         self.__azimJsonPath = "insitu20x200.azimint.json"
         self.__progressBarHandles = []
-        self.__tasks = ["azimuthal_integration","voigt_fit","axisTransform_fit"]#"voigt_fit""axisTransform_fit","voigt_fit""azimuthal_integration" "pseudoVoigt_fit" ["azimuthal_integration"]["pseudoVoigt_fit"]
+        self.__tasks = ["axisTransform_fit","voigt_fit"] #"azimuthal_integration""voigt_fit""axisTransform_fit","voigt_fit""azimuthal_integration" "pseudoVoigt_fit" ["azimuthal_integration"]["pseudoVoigt_fit"]"azimuthal_integration","voigt_fit"
+        self.__outputDirectory = "F:/NextCloud/University/2. FS/EDV/Versuch3/Versuch3/v3insitu_Results_Run_001"
         
         import tkinter as tk
         from tkinter import ttk
@@ -138,6 +139,8 @@ class Param():
         return self.__maxTheta 
     def getRadSteps(self):
         return self.__radSteps 
+    def getOutputDirectory(self):
+        return self.__outputDirectory
     def getNptAzim(self):
         return self.__nptAzim 
     def getRadialRange(self):

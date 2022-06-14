@@ -53,7 +53,7 @@ class AzimuthalIntegrationTask(Task):
                 nrOfJobs +=1
         return nrOfJobs
                         
-    def runTask(npt_rad,npt_azim,radial_range,settingJson,dataPaths: list,handles: list,pool:Pool): 
+    def runTask(outputPath,npt_rad,npt_azim,radial_range,settingJson,dataPaths: list,handles: list,pool:Pool): 
             executionStart = time.time()     
             
              #get logger which is used by the manager
@@ -69,7 +69,7 @@ class AzimuthalIntegrationTask(Task):
             
             queue =  pool.getQueue()
             settings = json.load(open(settingJson))
-            params = manager.dict({"logger":logger,"azimIntegrator":azimIntegrator,"returnVal":manager.dict({"units":TaskConfigs.AzimuthalIntegrationTask_Config.units,"settings":[{"pyFai_settings":settings}|{"npt_rad":npt_rad,"npt_azim":npt_azim,"radial_range":radial_range,"pyFai_settings":settingJson}]})})
+            params = manager.dict({"logger":logger,"azimIntegrator":azimIntegrator,"returnVal":manager.dict({"units":TaskConfigs.AzimuthalIntegrationTask_Config.units,"settings":[{"pyFai_settings":json.load(open(settingJson))}|{"npt_rad":npt_rad,"npt_azim":npt_azim,"radial_range":radial_range}]})})
             
             pool.idle()
             nrOfJobs =  AzimuthalIntegrationTask.fillQueue(dataPaths,queue,params)
@@ -85,6 +85,5 @@ class AzimuthalIntegrationTask(Task):
 
             logger.info("Finished Task in %ss"%(str(time.time()-executionStart))) 
             
+            
             return azimuthalIntegration_results
-            #Fill Queue with directory Paths
-                # load file

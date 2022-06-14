@@ -67,16 +67,18 @@ class VoigtFitTask(Task):
         nrOfTasks = 0
         for path in directoryPaths:
             for filePath in IO_Utils.getFilesThatEndwith(path,XRayDetectorDataParser.getAllowedFormats()):
-                if(nrOfTasks == 142):
-                    print("test")
                 try:
                     queue.put([VoigtFitTask.doPseudoVoigtFitting, [filePath,params,funcRet[TaskConfigs.AzimuthalIntegrationTask_Config.taskName][filePath]]])
                 except KeyError:
                     queue.put([VoigtFitTask.doPseudoVoigtFitting, [filePath,params,None]])
                 nrOfTasks +=1
+        currSettings = params["returnVal"]["settings"][0]
+        prevSettings = funcRet[TaskConfigs.AzimuthalIntegrationTask_Config.taskName]["settings"][0] if TaskConfigs.AzimuthalIntegrationTask_Config.taskName in set(funcRet) else  {}
+        print(prevSettings)
+        params["returnVal"]["settings"] = [currSettings | prevSettings]
         return nrOfTasks
     
-    def runTask(minTheta,maxTheta,directoryPaths: list,thetaAV,peak,handles: list,pool: Pool,funcRet: dict):
+    def runTask(outputPath,minTheta,maxTheta,directoryPaths: list,thetaAV,peak,handles: list,pool: Pool,funcRet: dict):
         execTime_start = time.time() 
         
         logger = pool.getLogger()
@@ -104,7 +106,7 @@ class VoigtFitTask(Task):
         
         voigtFit_results =dict(sorted(params["returnVal"].items()))
         
-        save_params = {"dict": voigtFit_results,"prefix":TaskConfigs.VoigtFitTask_Config.preFix,"precision":TaskConfigs.VoigtFitTask_Config.precision,"overwrite":False}
+        save_params = {"outputPath":outputPath,"dict": voigtFit_results,"prefix":TaskConfigs.VoigtFitTask_Config.preFix,"precision":TaskConfigs.VoigtFitTask_Config.precision,"overwrite":False}
         for saveDict in TaskConfigs.VoigtFitTask_Config.saveFunctions:
             saveDict(save_params)  
             

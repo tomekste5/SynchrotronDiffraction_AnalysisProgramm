@@ -1,5 +1,3 @@
-from statistics import mode
-import wave
 from Tasks.Config import TaskConfigs
 from IO import IO_Utils
 
@@ -17,6 +15,7 @@ import numpy as np
 
 from scipy.optimize import curve_fit
 from Multiprocessing.Pool import Pool
+from IO.Parser import XRayDetectorDataParser
 
 
 class AxisTransformFit:
@@ -60,6 +59,7 @@ class AxisTransformFit:
             stresshydro=(stressxx+stressxx+stresszz)/3
 
             return {"stressXX":stressxx,"stressZZ":stressxx,"stressXZ":stressxz,"stressHydro":stresshydro,"stressMises":stressmises}
+        
 class AxisTransformationTask(Task):
     
     def runTask():
@@ -102,7 +102,7 @@ class AxisTransformationTask(Task):
         nrOfTasks = 0
         reqFiles = {}
         for path in dataPaths:
-            for file in IO_Utils.getFilesThatEndwith(path,".cbf"):
+            for file in IO_Utils.getFilesThatEndwith(path,XRayDetectorDataParser.getAllowedFormats()):
                 if(not TaskConfigs.VoigtFitTask_Config.taskName in funcRet.keys() and not IO_Utils.getDirectory(file) in set(reqFiles)):
                     read_params  = {"file":file,"prefix":TaskConfigs.VoigtFitTask_Config.preFix}
                     reqFiles =  reqFiles | TaskConfigs.AxisTransformFitTask_Config.readFunction(read_params)
@@ -111,9 +111,13 @@ class AxisTransformationTask(Task):
                 else:
                     queue.put([AxisTransformationTask.doAxisTransformation,[file,params, reqFiles[file]]])
                 nrOfTasks +=1
+        #out = params["settings"].append([reqFiles[file]["settings"] if reqFiles != {} else  funcRet[TaskConfigs.VoigtFitTask_Config.taskName]["settings"]])
+        currSettings = params["returnVal"]["settings"][0]
+        prevSettings = reqFiles[file]["settings"][0] if reqFiles != {} else  funcRet[TaskConfigs.VoigtFitTask_Config.taskName]["settings"][0]
+        params["returnVal"]["settings"] = [currSettings | prevSettings]
         return nrOfTasks
     
-    def runTask(minTheta,dataPaths,wavelength,peak,E,Possions,d0,Z_positions,X_positions,handles: list,pool: Pool,funcRet: dict):
+    def runTask(outputPath,minTheta,dataPaths,wavelength,peak,E,Possions,d0,Z_positions,X_positions,handles: list,pool: Pool,funcRet: dict):
         
         execStart_time = time.time() 
         
@@ -147,7 +151,7 @@ class AxisTransformationTask(Task):
         
         AxisTransformationFit_results =dict(sorted(params["returnVal"].items()))
         
-        save_Params = {"dict": AxisTransformationFit_results,"prefix":TaskConfigs.AxisTransformFitTask_Config.preFix,"precision":TaskConfigs.AxisTransformFitTask_Config.precision,"overwrite":False}
+        save_Params = {"outputPath":outputPath,"dict": AxisTransformationFit_results,"prefix":TaskConfigs.AxisTransformFitTask_Config.preFix,"precision":TaskConfigs.AxisTransformFitTask_Config.precision,"overwrite":False}
         for saveDict in TaskConfigs.AxisTransformFitTask_Config.saveFunctions:
             saveDict(save_Params)  
             

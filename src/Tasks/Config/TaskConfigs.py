@@ -1,5 +1,5 @@
 import numpy as np
-from IO.Parser import CsvParser,PickleParser,XRayDetectorDataParser
+from IO.Parser import CsvParser,PickleParser,XRayDetectorDataParser,JsonParser
 import logging
        
 class AzimuthalIntegrationTask_Config():
@@ -11,7 +11,7 @@ class AzimuthalIntegrationTask_Config():
     precision = np.longdouble
     preFix = "AztimuthalIntegration"
     readFunction = XRayDetectorDataParser.loadDetectorFileRaw
-    saveFunctions = [CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory,PickleParser.writePickle_single]
+    saveFunctions = [CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory,PickleParser.writePickle_single,JsonParser.saveSettings_single]
     units = [{"FilePath":"string","azimAngle":"°"}| {"LorCoeff":"unknown","A":"xray count","x0":"2 Theta","FWHM":"unknown","LorCoeff_Err":"unknown","A_Err":"xray count","x0_Err":"°","FWHM_Err":"unkown"}]
     loggingLevel = logging.INFO
     
@@ -24,7 +24,7 @@ class VoigtFitTask_Config():
     precision = np.longdouble
     preFix = "VoigtFit"
     readFunction = XRayDetectorDataParser.loadAzimuthalIntegrationDataFile
-    saveFunctions = [CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory,PickleParser.writePickle_single]
+    saveFunctions = [CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory,PickleParser.writePickle_single,JsonParser.saveSettings_single,JsonParser.writeJson_single]
     units = [{"FilePath":"string","azimAngle":"°"}| {"LorCoeff":"unknown","A":"xray count","x0":"2 Theta","FWHM":"unknown","LorCoeff_Err":"unknown","A_Err":"xray count","x0_Err":"°","FWHM_Err":"unkown"}]
     loggingLevel = logging.INFO
 
@@ -35,7 +35,7 @@ class AxisTransformFitTask_Config():
     dependencies = {VoigtFitTask_Config.taskName:1}
     precision = np.longdouble
     readFunction = PickleParser.loadPickle
-    saveFunctions=[CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory,PickleParser.writePickle_single]
+    saveFunctions=[CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory,PickleParser.writePickle_single,JsonParser.saveSettings_single,JsonParser.writeJson_single]
     lambdaFileNr = lambda path: path[-9:-4]
     lambdaDirectoryNr = lambda path: path[-15:-10]
     preFix = "AxisTransformFit"

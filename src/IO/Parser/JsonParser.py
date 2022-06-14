@@ -1,12 +1,41 @@
-import os
-import pickle
-import re
-
+import json
 from IO import IO_Utils
+import re
+import numpy as np
+import pickle
+import os
+
+eachDirectoryCSV_FileName = -2
+
+def saveSettings_single(params):
+    dictionary = params["dict"]
+    settings = dictionary["settings"][0]
+    outputPath = params["outputPath"]
+    filePrefix = params["prefix"]
+    
+    
+    fileName =filePrefix+"_Settings"+".json"
+    
+    filePath = outputPath +"/"+fileName   
+    
+    json.dump(settings,open(filePath,"w"))
+    
+
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NpEncoder, self).default(obj)
+
+
 
 eachDirectoryPickle_FileName = -2
 
-def writePickle_single(params):
+def writeJson_single(params):
     
     dictionary = params["dict"]
     overwrite = params["overwrite"]
@@ -14,13 +43,13 @@ def writePickle_single(params):
     path = params["outputPath"]
     
 
-    fileName =filePrefix+".pickle"
+    fileName =filePrefix+".json"
     
 
     filePath = path+"/"+fileName
-    pickle.dump(dictionary,open(filePath, "wb"))
+    json.dump(dictionary,open(filePath, "w"),cls=NpEncoder)
     
-def writePickle_eachDirectory(params):
+def writeJson_eachDirectory(params):
         
     filePrefix = params["prefix"]
     dictionary = params["dict"]
@@ -40,7 +69,7 @@ def writePickle_eachDirectory(params):
         if(currentDirectory not in file and file != "units" and file != "settings"):
             directory_parsed = currentDirectory.replace("\\", "/").replace("//","/")
             
-            fileName = re.split("\\ |\/ |/",directory_parsed)[eachDirectoryPickle_FileName]+"_"+filePrefix+".pickle"
+            fileName = re.split("\\ |\/ |/",directory_parsed)[eachDirectoryPickle_FileName]+"_"+filePrefix+".json"
             
             filePath = directory_parsed+"/"+fileName
             
@@ -62,24 +91,10 @@ def writePickle_eachDirectory(params):
         
     directory_parsed = currentDirectory.replace("\\", "/").replace("//","/")
     
-    fileName = re.split("\\ |\/ |/",directory_parsed)[eachDirectoryPickle_FileName]+"_"+filePrefix+".pickle"
+    fileName = re.split("\\ |\/ |/",directory_parsed)[eachDirectoryPickle_FileName]+"_"+filePrefix+".json"
     
     filePath = directory_parsed+"/"+fileName
     
     if(not os.path.exists(filePath) or overwrite):
-        pickle.dump(dictToPickle,open(filePath, "wb"))
+        json.dump(dictToPickle,open(filePath, "w"),cls=NpEncoder)
         
-def loadPickle(params):
-        filePrefix = params["prefix"]
-        filePath = params["file"]
-        
-        directory = IO_Utils.getDirectory(filePath)
-        directory = directory.replace("\\", "/").replace("\\","/")
-        
-        filename = re.split("\\ |\/ |/",directory)[eachDirectoryPickle_FileName]
-        filepath = directory +"/"+filename+"_"+filePrefix+".pickle"
-        
-        files = pickle.load(
-                open(filepath, "rb"))
-        
-        return files
