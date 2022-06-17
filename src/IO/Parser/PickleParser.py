@@ -9,15 +9,14 @@ eachDirectoryPickle_FileName = -2
 def writePickle_single(params):
     
     dictionary = params["dict"]
-    overwrite = params["overwrite"]
     filePrefix = params["prefix"]
-    path = params["outputPath"]
+    outputPath = params["outputPath"]
     
 
     fileName =filePrefix+".pickle"
     
 
-    filePath = path+"/"+fileName
+    filePath = outputPath+"/"+fileName
     pickle.dump(dictionary,open(filePath, "wb"))
     
 def writePickle_eachDirectory(params):
@@ -40,7 +39,7 @@ def writePickle_eachDirectory(params):
         if(currentDirectory not in file and file != "units" and file != "settings"):
             directory_parsed = currentDirectory.replace("\\", "/").replace("//","/")
             
-            fileName = re.split("\\ |\/ |/",directory_parsed)[eachDirectoryPickle_FileName]+"_"+filePrefix+".pickle"
+            fileName = filePrefix+".pickle"
             
             filePath = directory_parsed+"/"+fileName
             
@@ -62,7 +61,7 @@ def writePickle_eachDirectory(params):
         
     directory_parsed = currentDirectory.replace("\\", "/").replace("//","/")
     
-    fileName = re.split("\\ |\/ |/",directory_parsed)[eachDirectoryPickle_FileName]+"_"+filePrefix+".pickle"
+    fileName = filePrefix+".pickle"
     
     filePath = directory_parsed+"/"+fileName
     
@@ -76,8 +75,7 @@ def loadPickle(params):
         directory = IO_Utils.getDirectory(filePath)
         directory = directory.replace("\\", "/").replace("\\","/")
         
-        filename = re.split("\\ |\/ |/",directory)[eachDirectoryPickle_FileName]
-        filepath = directory +"/"+filename+"_"+filePrefix+".pickle"
+        filepath = directory +"/"+filePrefix+".pickle"
         
         files = pickle.load(
                 open(filepath, "rb"))

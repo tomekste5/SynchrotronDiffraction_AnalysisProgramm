@@ -1,11 +1,10 @@
 import os
-import re
-import shutil
 
-
+#return directory of file
 def getDirectory(filePath):
     return os.path.split(filePath)[0]
 
+#return all files in a directory (recursively) that end with specified fileType
 def getFilesThatEndwith(path, fileTypes):
     graph = []
     for files in  os.walk(path):

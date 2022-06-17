@@ -1,13 +1,17 @@
 import time
 
-from Core.CoreModuleRegister import *
+from Utils.Param import Param
+#from GUI import GUI
+from Tasks.Config import TaskConfigs
+from Tasks import TaskRegister
+
 from Multiprocessing.Pool import Pool
 taskRegister = TaskRegister.taskRegister
 
 
 class Queue:
 
-    def getTasks(self, taskReg, tasks):
+    def getTasksByName(self, taskReg, tasks):
         return dict([(i, taskReg[i]) for i in tasks if i in set(taskReg)])
 
     def graphParser(task, tasks, taskPrio):
@@ -32,9 +36,9 @@ class Queue:
             return [task for _, task in sorted(zip([0], taskNames), reverse=True)]
 
     def parseTasks(self, params, pool, taskIdentifiers):
-        tasks = self.getTasks(taskRegister, taskIdentifiers)
-        excOrder = self.getTaskPriority(tasks)
-        for taskID in excOrder:
+        tasks = self.getTasksByName(taskRegister, taskIdentifiers)
+        executionOrder = self.getTaskPriority(tasks)
+        for taskID in executionOrder:
             dependencies = tasks[taskID]["dependencies"]
             if(len(dependencies) == 0):
                 dependencies = None
@@ -42,11 +46,11 @@ class Queue:
                 dependencies = [dependency for dependency in dependencies if (dependencies[dependency] and dependency in set(tasks))]
 
             comp = [func(params) for func in tasks[taskID]["input_params"]]
-            if(tasks[taskID]["logging"]):
+            if(tasks[taskID]["MultiProcessing"]):
                 comp.append(pool["pool"])
             tasks[taskID]["input_params"] = comp
             tasks[taskID]["dependencies"] = dependencies
-        return tasks, excOrder
+        return tasks, executionOrder
 
     def addTasks(self, params, pool, tasks):
         self.__taskQueue = self.parseTasks(params, pool, tasks)

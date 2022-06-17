@@ -31,16 +31,14 @@ class Pool():
         self.__killEvent.clear()
         self.__idle.set()
         for i in range(0,numberOfProcesses):
-            workerP = Process(target=Pool.runTasks, args = (self.__mainQueue,self.__killEvent,self.__idle))
+            workerP = Process(target=Pool.run, args = (self.__mainQueue,self.__killEvent,self.__idle))
             workerP.daemon = True
             workerP.start()
             self.__workerProcesses.append(workerP)
         
-    def addTask(self, task):
-        self.__mainQueue.put([task[0],task[1]])
     def getManager(self):
         return self.__manager
-    def runTasks(mainQueue,killEvent,idle):
+    def run(mainQueue,killEvent,idle):
         #logger = mp.log_to_stderr()
         
         while (not killEvent.is_set()):
@@ -57,8 +55,6 @@ class Pool():
     
     def changeLoggingLevel(self,level):
         return self.__rootLogger.setLevel(level)
-    def startWorkers(self):
-        pass
     def getLogger(self):
         return self.__rootLogger
     def idle(self):

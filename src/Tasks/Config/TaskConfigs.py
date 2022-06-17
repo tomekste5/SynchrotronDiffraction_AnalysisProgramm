@@ -3,42 +3,55 @@ from IO.Parser import CsvParser,PickleParser,XRayDetectorDataParser,JsonParser
 import logging
        
 class AzimuthalIntegrationTask_Config():
-    filenamePrefix = "AzimuthalIntegration_data_"
     taskName = "azimuthal_integration"
-    description = "Does things"
-    dependencies = {}
-    paramsToExport = ["FilePath,Azim,LorCoeff","A","x0","FWHM","LorCoeff_Err","A_Err","x0_Err","FWHM_Err"]
+    fileName_prefix = "AztimuthalIntegration"
+    
+    taskDescription = "Does things"
+    taskDependencies = {}
+    
     precision = np.longdouble
-    preFix = "AztimuthalIntegration"
-    readFunction = XRayDetectorDataParser.loadDetectorFileRaw
+    units = [{"FilePath":"string","azimAngle":"°"}
+             | {"LorCoeff":"unknown","A":"xray count","x0":"2 Theta","FWHM":"unknown","LorCoeff_Err":"unknown","A_Err":"xray count","x0_Err":"°","FWHM_Err":"unkown"}]
+    
+    loadFunction = XRayDetectorDataParser.loadDetectorFileRaw
     saveFunctions = [CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory,PickleParser.writePickle_single,JsonParser.saveSettings_single]
-    units = [{"FilePath":"string","azimAngle":"°"}| {"LorCoeff":"unknown","A":"xray count","x0":"2 Theta","FWHM":"unknown","LorCoeff_Err":"unknown","A_Err":"xray count","x0_Err":"°","FWHM_Err":"unkown"}]
+
     loggingLevel = logging.INFO
     
-class VoigtFitTask_Config():
-    filenamePrefix = "PseudoVoigt_data_"
-    taskName = "voigt_fit"
-    description = "Does things"
-    dependencies = {AzimuthalIntegrationTask_Config.taskName :1}
-    paramsToExport = ["FilePath,Azim,LorCoeff","A","x0","FWHM","LorCoeff_Err","A_Err","x0_Err","FWHM_Err"]
+class PseudoVoigtFitTask_Config():
+    taskName = "pseudoVoigt_fit"
+    fileName_prefix = "pseudoVoigtFit"
+    
+    taskDescription = "Does things"
+    taskDependencies = {AzimuthalIntegrationTask_Config.taskName :1}
+    
     precision = np.longdouble
-    preFix = "VoigtFit"
-    readFunction = XRayDetectorDataParser.loadAzimuthalIntegrationDataFile
+    units = [{"FilePath":"string","azimAngle":"°"}
+             | {"LorCoeff":"unknown","A":"xray count","x0":"2 Theta","FWHM":"unknown","LorCoeff_Err":"unknown","A_Err":"xray count","x0_Err":"°","FWHM_Err":"unkown"}]
+    
+    loadFunction = XRayDetectorDataParser.loadAzimuthalIntegrationDataFile
     saveFunctions = [CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory,PickleParser.writePickle_single,JsonParser.saveSettings_single,JsonParser.writeJson_single]
-    units = [{"FilePath":"string","azimAngle":"°"}| {"LorCoeff":"unknown","A":"xray count","x0":"2 Theta","FWHM":"unknown","LorCoeff_Err":"unknown","A_Err":"xray count","x0_Err":"°","FWHM_Err":"unkown"}]
+    
     loggingLevel = logging.INFO
 
 class AxisTransformFitTask_Config():
-    filenamePrefix = "elyptical_data_"
     taskName = "axisTransform_fit"
-    description = "Does things"
-    dependencies = {VoigtFitTask_Config.taskName:1}
+    fileName_prefix = "AxisTransformFit"
+    
+    taskDescription = "Does things"
+    taskDependencies = {PseudoVoigtFitTask_Config.taskName:1}
+    
     precision = np.longdouble
-    readFunction = PickleParser.loadPickle
+    units = [{"File":"filepath","Z_positions":"mm","X_positions":"mm"}
+             | {"strainYY":"1/1","strainZZ":"1/1","strainYZ":"1/1","strainYY_Err":"1/1","strainZZ_Err":"1/1","strainYZ_Err":"1/1"}
+             | {"stressXX":"Pa","stressYY":"Pa","stressYZ":"Pa","stressHydro":"Pa","stressMises":"Pa"}
+             | {"FWHM":"unknown","A":"xray count","x0":"2 Theta"}]
+    
+    loadFunction = PickleParser.loadPickle
     saveFunctions=[CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory,PickleParser.writePickle_single,JsonParser.saveSettings_single,JsonParser.writeJson_single]
+    
     lambdaFileNr = lambda path: path[-9:-4]
     lambdaDirectoryNr = lambda path: path[-15:-10]
-    preFix = "AxisTransformFit"
-    units = [{"File":"filepath","Z_positions":"mm","X_positions":"mm"} |{"strainYY":"1/1","strainZZ":"1/1","strainYZ":"1/1","strainYY_Err":"1/1","strainZZ_Err":"1/1","strainYZ_Err":"1/1"}|{"stressXX":"Pa","stressYY":"Pa","stressYZ":"Pa","stressHydro":"Pa","stressMises":"Pa"}| {"FWHM":"unknown","A":"xray count","x0":"2 Theta"}]
+    
     loggingLevel = logging.INFO
         

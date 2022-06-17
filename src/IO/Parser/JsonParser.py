@@ -1,11 +1,8 @@
 import json
 from IO import IO_Utils
-import re
 import numpy as np
 import pickle
 import os
-
-eachDirectoryCSV_FileName = -2
 
 def saveSettings_single(params):
     dictionary = params["dict"]
@@ -31,70 +28,70 @@ class NpEncoder(json.JSONEncoder):
             return obj.tolist()
         return super(NpEncoder, self).default(obj)
 
-
-
-eachDirectoryPickle_FileName = -2
-
 def writeJson_single(params):
     
     dictionary = params["dict"]
-    overwrite = params["overwrite"]
     filePrefix = params["prefix"]
-    path = params["outputPath"]
+    outputPath = params["outputPath"]
     
 
     fileName =filePrefix+".json"
     
 
-    filePath = path+"/"+fileName
+    filePath = outputPath+"/"+fileName
     json.dump(dictionary,open(filePath, "w"),cls=NpEncoder)
     
 def writeJson_eachDirectory(params):
         
     filePrefix = params["prefix"]
     dictionary = params["dict"]
-    overwrite = params["overwrite"]
     
     currentDirectory = IO_Utils.getDirectory(list(dictionary.keys())[0])
     
     
-    dictToPickle = {}
+    pickleContent = {}
+    #check if keywords like units or settings are present
     if("units" in set(dictionary)):
-        dictToPickle["units"] =  dictionary["units"]
+        pickleContent["units"] =  dictionary["units"]
         
     if("settings" in set(dictionary)):
-        dictToPickle["settings"] =  dictionary["settings"]
+        pickleContent["settings"] =  dictionary["settings"]
+    
     
     for file in dictionary:
         if(currentDirectory not in file and file != "units" and file != "settings"):
-            directory_parsed = currentDirectory.replace("\\", "/").replace("//","/")
+            #pickle pickle content for currDirectory
+            currentDirectory = currentDirectory.replace("\\", "/").replace("//","/")
             
-            fileName = re.split("\\ |\/ |/",directory_parsed)[eachDirectoryPickle_FileName]+"_"+filePrefix+".json"
+            fileName = filePrefix+".json"
             
-            filePath = directory_parsed+"/"+fileName
+            filePath = currentDirectory+"/"+fileName
             
-            if(not os.path.exists(filePath) or overwrite):
-                pickle.dump(dictToPickle,open(filePath, "wb"))
-                
+            if(not os.path.exists(filePath)):
+                pickle.dump(pickleContent,open(filePath, "wb"))
+            
+            
+            
+            #start new pickle content for new directory   
             currentDirectory = IO_Utils.getDirectory(file)
-            dictToPickle = {}
+            pickleContent = {}
             
             if("units" in set(dictionary)):
-                dictToPickle["units"] =  dictionary["units"]
+                pickleContent["units"] =  dictionary["units"]
         
             if("settings" in set(dictionary)):
-                dictToPickle["settings"] =  dictionary["settings"]
+                pickleContent["settings"] =  dictionary["settings"]
 
             
             
-        dictToPickle[file] = dictionary[file]
+        pickleContent[file] = dictionary[file]
         
-    directory_parsed = currentDirectory.replace("\\", "/").replace("//","/")
+    currentDirectory = currentDirectory.replace("\\", "/").replace("//","/")
     
-    fileName = re.split("\\ |\/ |/",directory_parsed)[eachDirectoryPickle_FileName]+"_"+filePrefix+".json"
+    fileName = filePrefix+".json"
     
-    filePath = directory_parsed+"/"+fileName
+    filePath = currentDirectory+"/"+fileName
     
-    if(not os.path.exists(filePath) or overwrite):
-        json.dump(dictToPickle,open(filePath, "w"),cls=NpEncoder)
+    if(not os.path.exists(filePath)):
+        json.dump(pickleContent,open(filePath, "w"),cls=NpEncoder)
         

@@ -1,9 +1,5 @@
 import os
 import time
-from multiprocessing import Process
-
-import pyFAI
-from sympy import rad
 
 from Tasks.Config import TaskConfigs
 from IO.Parser import XRayDetectorDataParser
@@ -12,16 +8,7 @@ from Multiprocessing.Pool import Pool
 from Tasks.Task import Task
 from IO.Parser import XRayDetectorDataParser
 import json
-
-class AzimuthalIntegrator:
-
-        def __init__(self, settingJson, args):
-            self.__pyFAI_azimIntegrator  = pyFAI.load(settingJson)
-            self.__pyFAI_callArgs = args
-        
-        def integrate2D(self,data,filename):
-            azimData = self.__pyFAI_azimIntegrator.integrate2d_ng(data=data, npt_rad=self.__pyFAI_callArgs[0],npt_azim=self.__pyFAI_callArgs[1],radial_range=self.__pyFAI_callArgs[2],unit="2th_deg",filename=filename)
-            return [*azimData]
+from libarys.AzimuthalIntegrator import AzimuthalIntegrator
 
 class AzimuthalIntegrationTask(Task):
     def getDescription():
@@ -33,27 +20,27 @@ class AzimuthalIntegrationTask(Task):
     
     
     def processFile(callParams):
-        path, params,data = callParams
-        azimIntegrator = params["azimIntegrator"]
+        filePath, params,data = callParams
+        azimuthalIntegrator = params["azimuthalIntegrator"]
         try:
-            detectorData = TaskConfigs.AzimuthalIntegrationTask_Config.readFunction(path).data
-            params["logger"].info('Starting to integrate: ' + (path))
-            azimData = azimIntegrator.integrate2D(detectorData,os.path.splitext(path)[0] + ".azim")
-            params["returnVal"][path] = azimData
-            params["logger"].info('Child process integrated File: ' + path)
+            detectorData = TaskConfigs.AzimuthalIntegrationTask_Config.loadFunction(filePath).data
+            params["logger"].info('Starting to integrate: ' + (filePath))
+            azimuthalIntegrationData = azimuthalIntegrator.integrate2D(detectorData,os.path.splitext(filePath)[0] + ".azim")
+            params["results"][filePath] = azimuthalIntegrationData
+            params["logger"].info('Child process integrated File: ' + filePath)
         except FileNotFoundError:
-            params["logger"].error("FileNotFoundError: No such file or directory: " +path)   
+            params["logger"].error("FileNotFoundError: No such file or directory: " +filePath)   
                 
                 
-    def fillQueue(dataPaths,queue,params):
+    def fillQueue(paths,queue,params):
         nrOfJobs = 0
-        for directory in dataPaths:
-            for filePath in IO_Utils.getFilesThatEndwith(directory,XRayDetectorDataParser.getAllowedFormats()):
+        for path in paths:
+            for filePath in IO_Utils.getFilesThatEndwith(path,XRayDetectorDataParser.getAllowedFormats()):
                 queue.put([AzimuthalIntegrationTask.processFile,[filePath,params,None]])
                 nrOfJobs +=1
         return nrOfJobs
                         
-    def runTask(outputPath,npt_rad,npt_azim,radial_range,settingJson,dataPaths: list,handles: list,pool:Pool): 
+    def runTask(outputPath,npt_rad,npt_azim,radial_range,settingJson,filePaths: list,progressBars: list,pool:Pool): 
             executionStart = time.time()     
             
              #get logger which is used by the manager
@@ -63,25 +50,27 @@ class AzimuthalIntegrationTask(Task):
             
             logger.info("Starting Task %s..."%(TaskConfigs.AzimuthalIntegrationTask_Config.taskName))
             
-            azimIntegrator = AzimuthalIntegrator(settingJson=settingJson,args = [npt_rad,npt_azim,radial_range])   
+            azimuthalIntegrator = AzimuthalIntegrator(settingJson=settingJson,args = [npt_rad,npt_azim,radial_range])   
             
             manager = pool.getManager()
             
             queue =  pool.getQueue()
             settings = json.load(open(settingJson))
-            params = manager.dict({"logger":logger,"azimIntegrator":azimIntegrator,"returnVal":manager.dict({"units":TaskConfigs.AzimuthalIntegrationTask_Config.units,"settings":[{"pyFai_settings":json.load(open(settingJson))}|{"npt_rad":npt_rad,"npt_azim":npt_azim,"radial_range":radial_range}]})})
+            params = manager.dict({"logger":logger,"azimuthalIntegrator":azimuthalIntegrator,
+                                   "results":manager.dict({"units":TaskConfigs.AzimuthalIntegrationTask_Config.units,
+                                    "settings":[{"pyFai_setting_json":settings}|{"npt_rad":npt_rad,"npt_azim":npt_azim,"radial_range":radial_range}]})
+                                    })
             
             pool.idle()
-            nrOfJobs =  AzimuthalIntegrationTask.fillQueue(dataPaths,queue,params)
+            nrOfJobs =  AzimuthalIntegrationTask.fillQueue(filePaths,queue,params)
             pool.start()
             
             
-            azimuthalIntegration_results =dict(sorted(params["returnVal"].items()))
+            azimuthalIntegration_results =dict(sorted(params["results"].items()))
             
-            while(len(params["returnVal"].keys()) < nrOfJobs):
+            while(len(params["results"].keys()) < nrOfJobs):
                 time.sleep(1)
-                logger.info("Reporting progress:    "+str(((len(params["returnVal"].keys())/(nrOfJobs+1) *100)))+ "%")
-                #handles[0].set((len(params["returnVal"].keys())/(nrOfTasks+1) *100))
+                logger.info("Reporting progress:    "+str(((len(params["results"].keys())/(nrOfJobs+1) *100)))+ "%")
 
             logger.info("Finished Task in %ss"%(str(time.time()-executionStart))) 
             

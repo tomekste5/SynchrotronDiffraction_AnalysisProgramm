@@ -1,6 +1,4 @@
 import pandas as pd
-import numpy as np
-import re
 
 from IO import IO_Utils
 
@@ -8,76 +6,64 @@ experimnentStrIdx = -2
 
 def writeCSV_single(params):
     dictionary = params["dict"]
-    overwrite = params["overwrite"]
-    filePrefix = params["prefix"]
-    path = params["outputPath"]
+    fileName_prefix = params["prefix"]
+    outputPath = params["outputPath"]
     
     csvContent = list()
     
     if("units" in set(dictionary)):
         csvContent.extend(dictionary["units"])
-    """
-    if("settings" in set(dictionary)):
-        csvContent.extend(dictionary["settings"])
-    """
 
     for file in dictionary:
         if("units" != file and "settings" != file):
             csvContent.extend(dictionary[file])
             
-    fileName =filePrefix+".csv"
-    filePath = path +"/"+fileName   
+    fileName =fileName_prefix+".csv"
+    filePath = outputPath +"/"+fileName   
     pd.DataFrame().from_records(csvContent,index=None).to_csv(filePath,index=False) 
         
 def writeCSV_eachDirectory(params):
     dictionary = params["dict"]
     filePrefix = params["prefix"]
-    sortedDict = sorted(dictionary)
-    currDirectory = IO_Utils.getDirectory(sortedDict[0]) 
+    currDirectory = IO_Utils.getDirectory(sorted(dictionary)[0]) 
+    
     csvContent = list()
     
             
     if("units" in set(dictionary)):
         csvContent.extend(dictionary["units"])
         
-    """
-    if("settings" in set(dictionary)):
-        csvContent.extend(dictionary["settings"])
-    """
 
     
-    for file in sortedDict:
+    for file in dictionary:
         if("units" != file and "settings" != file):
             if(currDirectory not in  file):
-                df = pd.DataFrame().from_records(csvContent,index=None)
-                directoryR = currDirectory.replace("\\", "/").replace("\\","/")
-                filename = re.split("\\ |\/ |/",directoryR)[experimnentStrIdx] +"_"+ filePrefix
-                df.to_csv(directoryR +"/"
-                            +filename+".csv",index=False)
+                #write file
+                directoryData = pd.DataFrame().from_records(csvContent,index=None)
+                
+                currDirectory = currDirectory.replace("\\", "/").replace("\\","/")
+                fileName = filePrefix + ".csv"
+                filePath = currDirectory +"/"+fileName
+                
+                directoryData.to_csv(filePath,index=False)
+                
+                
                 currDirectory = IO_Utils.getDirectory(file)
+                #reset csvContent
                 csvContent = list()
+                
                 if("units" in set(dictionary)):
                     csvContent.extend(dictionary["units"])
+                    
             csvContent.extend(dictionary[file])
-    df = pd.DataFrame().from_records(csvContent,index=None)
-    directoryR = currDirectory.replace("\\", "/").replace("\\","/")
-    filename = re.split("\\ |\/ |/",directoryR)[experimnentStrIdx] +"_"+ filePrefix
-    df.to_csv(directoryR +"/"
-                        +filename+".csv",index=False)
-def writeCSV_settings(params):
-    settings = params["settings"]
-    """
-    directory = IO_Utils.getDirectory(list(dictionary.keys())[0]).replace("\\", "/").replace("\\","/")
-    toFind = re.split("\\ |\/ |/",directory)[eachDirectoryCSV_FileName]
-    fileName ="".join(re.split("_",toFind)[0:-1])+"_"+filePrefix+".csv"
-    
-    path  = IO_Utils.getPathToResultDirectory(overwrite,toFind,directory,fileName)
-    filePath = path +"/"+fileName   
-    
-    
-    df = pd.DataFrame().from_records(settings,index=None)
-    df.to_csv(filePath)
-    """
+            
+            
+    directoryData = pd.DataFrame().from_records(csvContent,index=None)
+    currDirectory = currDirectory.replace("\\", "/").replace("\\","/")
+    fileName = filePrefix + ".csv"
+    filePath = currDirectory +"/"+fileName
+                
+    directoryData.to_csv(filePath,index=False)
 
 #Deprecated
 def writeCSV_eachFile(params):

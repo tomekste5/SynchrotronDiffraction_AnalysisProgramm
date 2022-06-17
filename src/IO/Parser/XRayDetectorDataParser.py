@@ -4,19 +4,19 @@ import numpy as np
 def loadDetectorFileRaw(path):
     return fabio.open(path)
 def loadAzimuthalIntegrationDataFile(params):
-    data = []
-    azimPath = params["path"]
+    azimuthalIntegrationData = []
+    pathToAzimuthalFile = params["path"]
     precision = params["precision"]
     
     
-    azimFile = loadDetectorFileRaw(azimPath)
-    deltaTheta = -precision(azimFile.header["2th_deg_min"]) + precision(azimFile.header["2th_deg_max"])
-    deltaChi = -precision(azimFile.header["chi_min"])+precision(azimFile.header["chi_max"])
-    data.append(azimFile.data)
-    data.append(np.arange(precision(azimFile.header["2th_deg_min"]),precision(azimFile.header["2th_deg_max"]),deltaTheta/precision(azimFile.header["Dim_1"])))
-    data.append(np.arange(precision(azimFile.header["chi_min"]),precision(azimFile.header["chi_max"]),deltaChi/precision(azimFile.header["Dim_2"])))
+    azimuthalFile = loadDetectorFileRaw(pathToAzimuthalFile)
+    deltaTheta = -precision(azimuthalFile.header["2th_deg_min"]) + precision(azimuthalFile.header["2th_deg_max"])
+    deltaChi = -precision(azimuthalFile.header["chi_min"])+precision(azimuthalFile.header["chi_max"])
+    azimuthalIntegrationData.append(azimuthalFile.data)
+    azimuthalIntegrationData.append(np.arange(precision(azimuthalFile.header["2th_deg_min"]),precision(azimuthalFile.header["2th_deg_max"]),deltaTheta/precision(azimuthalFile.header["Dim_1"])))
+    azimuthalIntegrationData.append(np.arange(precision(azimuthalFile.header["chi_min"]),precision(azimuthalFile.header["chi_max"]),deltaChi/precision(azimuthalFile.header["Dim_2"])))
     
-    return data
+    return azimuthalIntegrationData
     
 def getAllowedFormats():
     return [".cbf",".tif"]
