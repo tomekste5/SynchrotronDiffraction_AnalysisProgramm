@@ -4,6 +4,17 @@ import numpy as np
 import pickle
 import os
 
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NpEncoder, self).default(obj)
+
+
 def saveSettings_single(params):
     dictionary = params["dict"]
     settings = dictionary["settings"][0]
@@ -16,17 +27,6 @@ def saveSettings_single(params):
     filePath = outputPath +"/"+fileName   
     
     json.dump(settings,open(filePath,"w"))
-    
-
-class NpEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, np.integer):
-            return int(obj)
-        if isinstance(obj, np.floating):
-            return float(obj)
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return super(NpEncoder, self).default(obj)
 
 def writeJson_single(params):
     

@@ -12,4 +12,6 @@ def getFilesThatEndwith(path, fileTypes):
             for fileType in fileTypes:
                 if(file.lower().endswith(fileType)):
                         graph.append(files[0]+"/"+file)
+    if graph == [] and not  os.path.isfile(path):
+        raise FileNotFoundError
     return path if os.path.isfile(path) else graph

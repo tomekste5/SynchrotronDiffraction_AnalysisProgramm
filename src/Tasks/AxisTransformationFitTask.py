@@ -2,7 +2,6 @@ from Tasks.Config import TaskConfigs
 from IO import IO_Utils
 
 
-from queue import Empty
 import time
 
 from Tasks.Task import Task
@@ -28,7 +27,7 @@ class AxisTransformationTask(Task):
         
     
     def doAxisTransformation(callParams):
-        file, params, voigtFitData= callParams
+        file, params, voigtFitData= callParams[:3]
         try:
             azimuthalAngles,x0,x0_err= np.array([voigtFitData[i]["azimAngle"] for i in range(len(voigtFitData))]),np.array([TaskConfigs.AxisTransformFitTask_Config.precision(voigtFitData[i]["x0"]) for i in range(len(voigtFitData))]),np.array([voigtFitData[i]["x0_Err"] for i in range(len(voigtFitData))])
             
@@ -46,8 +45,6 @@ class AxisTransformationTask(Task):
             params["results"][file] = [{"File":file,"Z_positions":params["Z_positions"][int(TaskConfigs.AxisTransformFitTask_Config.lambdaFileNr(file))-1],"X_positions":params["X_positions"][int(TaskConfigs.AxisTransformFitTask_Config.lambdaDirectoryNr(file))-1]}| fitData |principalStresses| {"FWHM":np.mean(np.array([voigtFitData[i]["FWHM"] for i in range(len(voigtFitData))])),"A":np.mean(np.array([voigtFitData[i]["A"] for i in range(len(voigtFitData))])),"x0":np.mean(np.array([voigtFitData[i]["x0"] for i in range(len(voigtFitData))]))}]
     
             params["logger"].info("Fitted File: " + file)
-        except Empty:
-            pass
         except FileNotFoundError:
             params["logger"].error("FileNotFoundError: No such file or directory: " +file)   
     
@@ -58,8 +55,8 @@ class AxisTransformationTask(Task):
             for file in IO_Utils.getFilesThatEndwith(path,XRayDetectorDataParser.getAllowedFormats()):
                 
                 if(not TaskConfigs.PseudoVoigtFitTask_Config.taskName in funcRet.keys() and not IO_Utils.getDirectory(file) in set(loadedPickleFiles)):
-                    read_params  = {"file":file,"prefix":TaskConfigs.PseudoVoigtFitTask_Config.fileName_prefix}
-                    loadedPickleFiles =  loadedPickleFiles | TaskConfigs.AxisTransformFitTask_Config.loadFunction(read_params)
+                    load_params  = {"file":file,"prefix":TaskConfigs.PseudoVoigtFitTask_Config.fileName_prefix}
+                    loadedPickleFiles =  loadedPickleFiles | TaskConfigs.AxisTransformFitTask_Config.loadFunction(load_params)
                     
                     
                 if(TaskConfigs.PseudoVoigtFitTask_Config.taskName in funcRet.keys() and file in funcRet[TaskConfigs.PseudoVoigtFitTask_Config.taskName].keys()):
@@ -75,7 +72,7 @@ class AxisTransformationTask(Task):
         params["results"]["settings"] = [axisTranformationFit_settings | voigtFit_settings]
         return nrOfTasks
     
-    def runTask(outputPath,minTheta,filePaths,wavelength,peak,E,Possions,d0,Z_positions,X_positions,progressBars: list,pool: Pool,funcRet: dict):
+    def runTask(outputPath,filePaths,wavelength,peak,E,Possions,d0,Z_positions,X_positions,progressBars: list,pool: Pool,funcRet: dict):
         
         execStart_time = time.time() 
         
@@ -90,9 +87,9 @@ class AxisTransformationTask(Task):
                 
         processQueue =pool.getQueue()
         
-        params = m.dict({"logger":logger,"results":m.dict({"units":TaskConfigs.AxisTransformFitTask_Config.units,
+        params = {"logger":logger,"results":m.dict({"units":TaskConfigs.AxisTransformFitTask_Config.units,
                                                              "settings":[{"wavelength":wavelength,"E-Modules":E,"possions":Possions,"d0":d0}]})
-                         ,"d0":d0,"wavelength":wavelength,"Z_positions":Z_positions,"X_positions":X_positions,"E_Modules":E[peak],"Possion_Numbers":Possions[peak]})
+                         ,"d0":d0,"wavelength":wavelength,"Z_positions":Z_positions,"X_positions":X_positions,"E_Modules":E[peak],"Possion_Numbers":Possions[peak]}
 
         #To ensure processing doesnt start while filling the Queue (could result in blocking each other, so low speed)
         pool.idle()

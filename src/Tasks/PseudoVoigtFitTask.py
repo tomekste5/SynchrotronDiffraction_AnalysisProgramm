@@ -22,13 +22,13 @@ class PseudoVoigtFitTask(Task):
     
                     
     def doPseudoVoigtFitting(callParams):
-        filePath,params,azimuthalIntegrationData = callParams
+        filePath,params,azimuthalIntegrationData = callParams[:3]
         try:
             #if azimuthalIntegrationData not loaded yet load it
             if(azimuthalIntegrationData == None):
                 pathToAzimFile =filePath.replace(filePath.split(".")[-1],"azim")
-                readParams = {"path":pathToAzimFile, "precision":TaskConfigs.PseudoVoigtFitTask_Config.precision}
-                azimuthalIntegrationData =TaskConfigs.PseudoVoigtFitTask_Config.loadFunction(readParams) #use load function defined in tasks configs
+                loadParams = {"path":pathToAzimFile, "precision":TaskConfigs.PseudoVoigtFitTask_Config.precision}
+                azimuthalIntegrationData =TaskConfigs.PseudoVoigtFitTask_Config.loadFunction(loadParams) #use load function defined in tasks configs
             
             interval = (azimuthalIntegrationData[1] < params["maxTheta"]) & (params["minTheta"] <azimuthalIntegrationData[1]) # get theta interval from minTheta to maxTheta
             
@@ -77,7 +77,7 @@ class PseudoVoigtFitTask(Task):
         
         results = manager.dict({"units":TaskConfigs.PseudoVoigtFitTask_Config.units,"settings":[{"minTheta":minTheta,"maxTheta":maxTheta,"peak":peak,"thetaAV":thetaAV}]})
         
-        params = manager.dict({"logger":logger,"maxTheta":maxTheta,"minTheta":minTheta,"thetaPeak":thetaAV[peak],"results":results})
+        params = {"logger":logger,"maxTheta":maxTheta,"minTheta":minTheta,"thetaPeak":thetaAV[peak],"results":results}
         
         #To ensure processing doesnt start while filling the Queue (could result in blocking each other, so low speed)
         pool.idle()
