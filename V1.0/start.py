@@ -8,6 +8,6 @@ from GUI.GUI import GUI
 if __name__ == '__main__':
 
     core = Core()
-    #gui = GUI(core.getParamObj(),core)
+    gui = GUI(core.getParamObj(),core)
     core.shutdown()
     core.run()

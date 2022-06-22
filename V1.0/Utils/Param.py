@@ -1,6 +1,3 @@
-from sympy import true
-
-
 class param():
     def __init__(self) -> None:
         
@@ -123,9 +120,9 @@ class param():
     def getMode(self):
         return self.__mode
     def getIsMultiprocessingAllowed(self):
-        return true
+        return True
     def getIsMultithreadingAllowed(self):
-        return true
+        return True
     def getTasks(self):
         return self.__tasks
     def getEModules(self):
