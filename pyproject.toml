@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "package_synchrotronAnalysis_V1.0"
+version = "1.0.0"
+authors = [
+  { name="Tomek steenbock", email="tomsteen@uni-bremen.de" },
+]
+description = "Analysis program for XDR"
+readme = "README.md"
+requires-python = ">=3.5"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/tomekste5/SynchrotronDiffraction_AnalysisProgramm"
+"Bug Tracker" = "https://github.com/tomekste5/SynchrotronDiffraction_AnalysisProgramm/issues"
