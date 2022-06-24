@@ -1,22 +1,29 @@
 import numpy as np
 from IO.Parser import CsvParser,PickleParser,XRayDetectorDataParser,JsonParser
 import logging
-       
+
+
+
 class AzimuthalIntegrationTask_Config():
-    taskName = "azimuthal_integration"
-    fileName_prefix = "AztimuthalIntegration"
+    taskName = "azimuthal_integration" #used to identify the task 
+    fileName_prefix = "AztimuthalIntegration"#prefix that is used for file that are written by this task 
     
-    taskDescription = "Does a azimuthal integration of XDR-Detector data"
-    taskDependencies = {}
+    taskDescription = "Does a azimuthal integration of XDR-Detector data" #short Description currently unimplemented
+    taskDependencies = {} #define if Task is dependent on other tasks following structure: [taskname:1] or [taskname:0] when the return values should always be ignored and instead load the written files with the results. 
     
-    precision = np.longdouble
-    units = [{"FilePath":"string","azimAngle":"°"}
+    precision = np.longdouble #which datatype to use !ONLY NUMPY DATATYPES!
+    units = [{"FilePath":"string","azimAngle":"°"} #Units
              | {"LorCoeff":"unknown","A":"xray count","x0":"2 Theta","FWHM":"unknown","LorCoeff_Err":"unknown","A_Err":"xray count","x0_Err":"°","FWHM_Err":"unkown"}]
     
-    loadFunction = XRayDetectorDataParser.loadDetectorFileRaw
-    saveFunctions = [CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory,PickleParser.writePickle_single,JsonParser.saveSettings_single]
+    
+    loadFunction = XRayDetectorDataParser.loadDetectorFileRaw #function that is used to load the detector File
+    
+        
+    #Since all Task have a standardized output (See Documentation) every parser function that was written for that type can be used for any Task!
+    saveFunctions = [CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory,PickleParser.writePickle_single,JsonParser.saveSettings_single] #Functions to call when saving the results 
 
-    loggingLevel = logging.INFO
+    loggingLevel = logging.INFO #logging level
+    
     
 class PseudoVoigtFitTask_Config():
     taskName = "pseudoVoigt_fit"

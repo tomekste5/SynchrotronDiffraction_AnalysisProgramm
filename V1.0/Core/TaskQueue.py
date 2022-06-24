@@ -21,41 +21,43 @@ class TaskQueue:
         """
         return dict([(i, taskReg[i]) for i in taskNames if i in set(taskReg)])
 
-    def graphParser(taskOfInterest, tasks, taskPrio):
+    def graphParser(taskOfInterest, tasksToExecute, numberOfDependentTasks):
         """Return the number of tasks that are dependent of the taskOfInterest.
         Uses Recursion!
 
         Args:
-            taskOfInterest (string): _description_
-            tasks (dictionary): _description_
-            taskPrio (int): _description_
+            taskOfInterest (string): The task for which to search dependent tasks
+            tasksToExecute (dictionary): dictionary with all tasks that need to be executed
+            numberOfDependentTasks (int)
 
         Returns:
             int: how many tasks are dependent on taskOfInterest
         """
-        for secTask in tasks:
-            if(taskOfInterest in set(tasks[secTask]["dependencies"])):
-                taskPrio = TaskQueue.graphParser(secTask, tasks, taskPrio)
-        return taskPrio+1
+        for secTask in tasksToExecute: #Check for every task if it is dependent on the task of interest
+            if(taskOfInterest in set(tasksToExecute[secTask]["dependencies"])):#if a task is found check how many tasks are dependent on that task and add the number to the numberOfDependentTasks of the taskOfInterest
+                numberOfDependentTasks = TaskQueue.graphParser(secTask, tasksToExecute, numberOfDependentTasks)
+        return numberOfDependentTasks+1
 
-    def getExecutionOrder(tasks):
+    def getExecutionOrder(tasksToExecute):
         """Returns tasks in an order where tasks that have the most tasks dependent on them are fist
 
         Args:
-            tasks (dictionary): tasks to sort
+            tasksToExecute (dictionary): tasks to sort for execution order
 
         Returns:
             dictionary: A dictionary where the tasks are in right execution order
         """
-        taskPrioritys = []
+        numberOfDependencys = []
 
-        taskNames = tasks.keys() #get task names
-        if(len(tasks) > 1):
-            for task in tasks:
-                taskPrioritys.append(TaskQueue.graphParser(task, tasks, 0)-1)
+        taskNames = tasksToExecute.keys() #get task names
+        if(len(tasksToExecute) > 1):# if more than one task needs to be executed
+            
+            for task in tasksToExecute:#get for every task the numberOfDependentTasks
+                numberOfDependencys.append(TaskQueue.graphParser(task, tasksToExecute, 0)-1)
 
-            [x for _, x in sorted(zip(taskPrioritys, taskNames))]
-            return [task for _, task in sorted(zip(taskPrioritys, taskNames), reverse=True)]
+            #sort the dictionary according to the numberOfDependentTasks (from HIGH to LOW) so that as much dependencies are fulfilled 
+            [x for _, x in sorted(zip(numberOfDependencys, taskNames))]
+            return [task for _, task in sorted(zip(numberOfDependencys, taskNames), reverse=True)]
         else:
             [x for _, x in sorted(zip([0], taskNames))]
             return [task for _, task in sorted(zip([0], taskNames), reverse=True)]
@@ -71,21 +73,25 @@ class TaskQueue:
             dictionary: dictionary of tasks where the input is parsed
             dictionary: execution order
         """
-        tasks = TaskQueue.getTasksByName(self.__taskRegister, taskNames)
-        executionOrder = TaskQueue.getExecutionOrder(tasks)
+        tasks = TaskQueue.getTasksByName(self.__taskRegister, taskNames) #select tasks that need to be executed from task register
+        executionOrder = TaskQueue.getExecutionOrder(tasks) #get execution order
         
-        for taskName in executionOrder:
-            dependencies = tasks[taskName]["dependencies"]
-            if(len(dependencies) == 0):
-                dependencies = None
+        for taskName in executionOrder:# for every task: check if multiprocessing core is needed, parse input parameters get number values instead of functions and remove dependencies that cant be fulfilled
+            parsed_dependencies = tasks[taskName]["dependencies"]
+            
+            if(len(parsed_dependencies) == 0):
+                parsed_dependencies = None
             else:
-                dependencies = [dependency for dependency in dependencies if (dependencies[dependency] and dependency in set(tasks))]
+                parsed_dependencies = [dependency for dependency in parsed_dependencies if (parsed_dependencies[dependency] and dependency in set(tasks))]
 
-            comp = [func(params) for func in tasks[taskName]["input_params"]]
+            parsed_inputParams = [func(params) for func in tasks[taskName]["input_params"]]
+            
             if(tasks[taskName]["MultiProcessing"]):
-                comp.append(self.__pool)
-            tasks[taskName]["input_params"] = comp
-            tasks[taskName]["dependencies"] = dependencies
+                parsed_inputParams.append(self.__pool)
+                
+            tasks[taskName]["input_params"] = parsed_inputParams
+            tasks[taskName]["dependencies"] = parsed_dependencies
+            
         return tasks, executionOrder
 
     def addTasks(self, params, taskNames):
@@ -105,15 +111,15 @@ class TaskQueue:
         for taskName in taskExecutionOrder:
             taskDependencies = {}
             #if task has dependencies on return values of other tasks, call run with these
-            if(tasks[taskName]["dependencies"] != None):
+            if(tasks[taskName]["dependencies"] != None): #if Task has any dependencies that can be fulfilled
                 
-                for func in tasks[taskName]["dependencies"]:
+                for func in tasks[taskName]["dependencies"]: #collect return values of functions that were defined as dependencies and were executed as well
                     taskDependencies[func] = tasks[func]["return_val"]
                     
                 #call handle of task 
-                tasks[taskName]["return_val"] = tasks[taskName]["handle"](*tasks[taskName]["input_params"], taskDependencies)
+                tasks[taskName]["return_val"] = tasks[taskName]["handle"](*tasks[taskName]["input_params"], taskDependencies) #call Task handle
 
             else:
-               tasks[taskName]["return_val"] = tasks[taskName]["handle"](*tasks[taskName]["input_params"])
+               tasks[taskName]["return_val"] = tasks[taskName]["handle"](*tasks[taskName]["input_params"]) #call Task handle
                
                
