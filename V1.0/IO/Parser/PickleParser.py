@@ -7,6 +7,11 @@ from IO import IO_Utils
 eachDirectoryPickle_FileName = -2
 
 def writePickle_single(params):
+    """Pickles the entire result dictionary in the defined outputDirectory
+
+    Args:
+        params (dictionary): Required Keys: dict,prefix,outputPath
+    """
     
     dictionary = params["dict"]
     filePrefix = params["prefix"]
@@ -20,6 +25,12 @@ def writePickle_single(params):
     pickle.dump(dictionary,open(filePath, "wb"))
     
 def writePickle_eachDirectory(params):
+    """Pickles the corresponding part of the result dictionary in the directory where the raw files of that part lie.
+    
+
+    Args:
+        params (dictionary): Required Keys: "prefix" -for filename , "dict" - dictionary to store, "overwrite" - deprecated 
+    """
         
     filePrefix = params["prefix"]
     dictionary = params["dict"]
@@ -69,6 +80,14 @@ def writePickle_eachDirectory(params):
         pickle.dump(dictToPickle,open(filePath, "wb"))
         
 def loadPickle(params):
+        """Loads pickle file
+
+        Args:
+            params (dictionary): Required keys: "prefix","file"
+
+        Returns:
+            _type_: _description_
+        """
         filePrefix = params["prefix"]
         filePath = params["file"]
         

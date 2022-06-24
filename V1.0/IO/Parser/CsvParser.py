@@ -5,6 +5,11 @@ from IO import IO_Utils
 experimnentStrIdx = -2
 
 def writeCSV_single(params):
+    """Writes dictionary to a single csv file in the defined output directory.
+
+    Args:
+        params (dictionary): Required keys: "dict", "prefix","outputPath"
+    """
     dictionary = params["dict"]
     fileName_prefix = params["prefix"]
     outputPath = params["outputPath"]
@@ -23,6 +28,11 @@ def writeCSV_single(params):
     pd.DataFrame().from_records(csvContent,index=None).to_csv(filePath,index=False) 
         
 def writeCSV_eachDirectory(params):
+    """write a csv in each directory with the corresponding part of the result dictionary
+
+    Args:
+        params (dictionary): Required keys: "dict","prefix" - filename
+    """
     dictionary = params["dict"]
     filePrefix = params["prefix"]
     currentDirectory = IO_Utils.getDirectory(sorted(dictionary)[0]) 
@@ -67,6 +77,11 @@ def writeCSV_eachDirectory(params):
 
 #Deprecated
 def writeCSV_eachFile(params):
+    """write for each detector file a csv file with the corresponding results
+
+    Args:
+        params (dictionary): Required keys: "dict"
+    """
     dictionary = params["dict"]
     
     for directory in dictionary:

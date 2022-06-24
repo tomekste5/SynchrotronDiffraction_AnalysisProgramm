@@ -1,18 +1,16 @@
 import time
-from queue import Empty
 
 import numpy as np
 from scipy.optimize import curve_fit
 
 from Tasks.Config import TaskConfigs
 from IO import IO_Utils
-from Tasks.Task import Task
 from IO.Parser import XRayDetectorDataParser
 from Multiprocessing.Pool import Pool
 from libarys import PseudoVoigtFit
 
 
-class PseudoVoigtFitTask(Task):
+class PseudoVoigtFitTask():
     def getDescription():
         return TaskConfigs.PseudoVoigtFitTask_Config.taskDescription
     def getFuncName():
@@ -22,6 +20,14 @@ class PseudoVoigtFitTask(Task):
     
                     
     def doPseudoVoigtFitting(callParams):
+        """Does pseudo-voigt fit for every file which is passed and writes results in the results dict.
+
+        Args:
+            callParams (list): [dictionary contains path to file, parameters required to do the fit, results from azimuthal integration]
+            
+        """
+        
+        
         filePath,params,azimuthalIntegrationData = callParams[:3]
         try:
             #if azimuthalIntegrationData not loaded yet load it
@@ -49,6 +55,19 @@ class PseudoVoigtFitTask(Task):
 
 
     def fillQueue(funcRet,filePaths,queue,params):
+        """Fills the multiprocessing Queue with the files that are found in paths
+
+        Args:
+            funcRet (dictionary): Dictionary which contains the results of tasks defined as dependency´s in TaskConfig
+            filePaths (list): paths to detector files or directory´s that contain detector files
+            queue (Multiprocessing.Queue): Queue of multiprocessing pool
+            params (dictionary): Dictionary that contains the Results array, parameters required for the AxisTransformationFit and the logger
+
+        Returns:
+            int: how many file need to be processed, referred by jobs.
+        """
+        
+        
         nrOfJobs = 0
         for path in filePaths:
             for filePath in IO_Utils.getFilesThatEndwith(path,XRayDetectorDataParser.getAllowedFormats()):
@@ -65,6 +84,24 @@ class PseudoVoigtFitTask(Task):
         return nrOfJobs
     
     def runTask(outputPath,elabFtwJson,minTheta,maxTheta,filePaths: list,thetaAV,peak,progressBar: list,pool: Pool,funcRet: dict):
+        """Does a pseudo-Voigt fit for every file by using multiprocessing.
+
+        Args:
+            outputPath (string):  Path to directory where to store the single results file
+            elabFtwJson (dictionary):  ELabFTWJson object which was used
+            minTheta (chosen precision): Start value of Interval which is to Fit 
+            maxTheta (chosen precision): End value of Interval which is to Fit 
+            filePaths (list):  Paths to detector files or directory´s that contain detector files
+            thetaAV (list): _description_
+            peak (int): For which peak to calculate the lattice distance (Array index) 
+            progressBar (list): _description_
+            pool (Pool):  Handle to progress bar on gui
+            funcRet (dict): Dictionary which contains the results of azimuthalIntegrationTask
+
+        Returns:
+            dictionary:  results in standardized format (See documentation)
+        """
+        
         execTime_start = time.time() 
         
         logger = pool.getLogger()

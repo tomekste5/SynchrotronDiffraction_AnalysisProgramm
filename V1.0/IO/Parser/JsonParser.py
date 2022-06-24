@@ -5,6 +5,7 @@ import pickle
 import os
 
 class NpEncoder(json.JSONEncoder):
+    """Makes Json.dump able to save numpy datatypes"""
     def default(self, obj):
         if isinstance(obj, np.integer):
             return int(obj)
@@ -16,6 +17,12 @@ class NpEncoder(json.JSONEncoder):
 
 
 def saveSettings_single(params):
+    """Saves dictionary that contains the parameters that where used for the process step in defined output path
+
+    Args:
+        params (dictionary): Required keys: "dict","outputPath","prefix" - filename
+    """
+    
     dictionary = params["dict"]
     settings = dictionary["settings"][0]
     outputPath = params["outputPath"]
@@ -29,6 +36,11 @@ def saveSettings_single(params):
     json.dump(settings,open(filePath,"w"))
 
 def writeJson_single(params):
+    """Write dictionary to single json in defined output directory
+
+    Args:
+        params (dictionary): Required Keys: "dict", "prefix","outputPath"
+    """
     
     dictionary = params["dict"]
     filePrefix = params["prefix"]
@@ -42,6 +54,11 @@ def writeJson_single(params):
     json.dump(dictionary,open(filePath, "w"),cls=NpEncoder)
     
 def writeJson_eachDirectory(params):
+    """Writes a json file in each directory with the corresponding part in the results dictionary.
+
+    Args:
+        params (dictionary): Required keys: "prefix", "dict"
+    """
         
     filePrefix = params["prefix"]
     dictionary = params["dict"]

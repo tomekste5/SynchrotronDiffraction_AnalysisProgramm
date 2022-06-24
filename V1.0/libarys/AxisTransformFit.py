@@ -3,17 +3,37 @@ from scipy.optimize import curve_fit
 
 
 def axisTransformFit(x,*p):
+    """Computes axis transformation ellipse for given azimuthal angles (x) and constant values
+
+    Args:
+        x (list): list of azimuthal Angles
+
+    Returns:
+        np.array: strainEllipse(x)
+    """
+    
     eyy,ezz,eyz = p
     theta = 5.8*np.pi/180 #change!
     chi = x
-    #'((sind(theta))^2)*(0)+((cosd(theta))^2)*((sind(chi))^2)*eyy+((cosd(theta))^2)*((cosd(chi))^2)*ezz-((sind(2*theta)))*((cosd(chi)))*0+((cosd(theta))^2)*((sind(2*chi)))*eyz'
-    #((sind(2*theta)))*((cosd(chi)))*0+((cosd(theta))^2)*((sind(2*chi)))*eyz
     return ((np.cos(theta))**2)*((np.sin(chi))**2)*eyy+((np.cos(theta))**2)*((np.cos(chi))**2)*ezz+((np.cos(theta))**2)*((np.sin(2*chi)))*eyz
 
+#poly1 function to fit initial guess
 def poly1(x,a, b, c):
     return a*x+b
 
 def doFit(azimuthalAngles,x0,x0_err,d0,wavelength):
+    """Fits strain ellipsoid on given x0 and azimuthal angles
+
+    Args:
+        azimuthalAngles (list): list of azimuthal angles
+        x0 (list): list of peak positions 
+        x0_err (_type_): list of peak positions fit error
+        d0 (chosen precision): Lattice distance in unstressed case 
+        wavelength (chosen precision): Wavelength which was used during the experiment
+
+    Returns:
+        dictionary: A Dictionary which contains the chosen constants of the fit as well as there errors
+    """
     trashData_count = np.count_nonzero([(np.array(x0)/np.array(x0_err)) <= 0.01]) #count how much rows are unusable doe to high error
             
     if(trashData_count < len(azimuthalAngles)-6):
@@ -32,14 +52,26 @@ def doFit(azimuthalAngles,x0,x0_err,d0,wavelength):
         return {"strainXX":0,"strainZZ":0,"strainXZ":0,"strainXX_Err":0,"strainZZ_Err":0,"strainXZ_Err":0}
     
     
-def calculatePrincipalStresses(E,poisson,strainYY,strainZZ,strainYZ):
+def calculatePrincipalStresses(E,poissonNumbers,strainXX,strainZZ,strainXZ):
+        """Calculates stresses in XX,YY,YZ direction and Mises/Hydro
 
-        stressXX=(E/((1+poisson)*(1-2*poisson)))*((1-poisson)*strainYY)+(E/((1+poisson)*(1-2*poisson)))*((poisson)*strainZZ)+(E/((1+poisson)*(1-2*poisson)))*((poisson)*0)
-        stressZZ=(E/((1+poisson)*(1-2*poisson)))*((1-poisson)*strainZZ)+(E/((1+poisson)*(1-2*poisson)))*((poisson)*strainYY)+(E/((1+poisson)*(1-2*poisson)))*((poisson)*0)
-        stressXZ=(E/((1+poisson)*(1-2*poisson)))*((1-2*poisson)*strainYZ)
+        Args:
+            E (list): List of E-Modules for different lattice plane
+            poissonNumbers (list): List of poisson numbers for different lattice plane
+            strainYY (list): list of strainsYY
+            strainZZ (list): list of strainsYY
+            strainYZ (list): list of strainsYY
+
+        Returns:
+            dictionary: dictionary that contrains stressXX,stressZZ,stressXZ,stressMises,stressHydro
+        """
+
+        stressXX=(E/((1+poissonNumbers)*(1-2*poissonNumbers)))*((1-poissonNumbers)*strainXX)+(E/((1+poissonNumbers)*(1-2*poissonNumbers)))*((poissonNumbers)*strainZZ)+(E/((1+poissonNumbers)*(1-2*poissonNumbers)))*((poissonNumbers)*0)
+        stressZZ=(E/((1+poissonNumbers)*(1-2*poissonNumbers)))*((1-poissonNumbers)*strainZZ)+(E/((1+poissonNumbers)*(1-2*poissonNumbers)))*((poissonNumbers)*strainXX)+(E/((1+poissonNumbers)*(1-2*poissonNumbers)))*((poissonNumbers)*0)
+        stressXZ=(E/((1+poissonNumbers)*(1-2*poissonNumbers)))*((1-2*poissonNumbers)*strainXZ)
 
 
-        stressXX=(E/((1+poisson)*(1-2*poisson)))*((1-poisson)*0)+(E/((1+poisson)*(1-2*poisson)))*((poisson)*strainZZ)+(E/((1+poisson)*(1-2*poisson)))*((poisson)*strainYY)
+        stressXX=(E/((1+poissonNumbers)*(1-2*poissonNumbers)))*((1-poissonNumbers)*0)+(E/((1+poissonNumbers)*(1-2*poissonNumbers)))*((poissonNumbers)*strainZZ)+(E/((1+poissonNumbers)*(1-2*poissonNumbers)))*((poissonNumbers)*strainXX) #FIXME bug
 
         stressMises=np.sqrt((1/2)*((stressXX-stressXX)**2+(stressXX-stressZZ)**2+(stressZZ-stressXX)**2+6*stressXZ**2))
 

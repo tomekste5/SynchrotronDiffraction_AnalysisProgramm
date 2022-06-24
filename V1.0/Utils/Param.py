@@ -1,4 +1,4 @@
-class param():
+class Param():
     def __init__(self) -> None:
         
         mintheta = 5.5

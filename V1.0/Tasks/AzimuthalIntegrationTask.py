@@ -5,12 +5,14 @@ from Tasks.Config import TaskConfigs
 from IO.Parser import XRayDetectorDataParser
 from IO import IO_Utils
 from Multiprocessing.Pool import Pool
-from Tasks.Task import Task
 from IO.Parser import XRayDetectorDataParser
 import json
 from libarys.AzimuthalIntegrator import AzimuthalIntegrator
 
-class AzimuthalIntegrationTask(Task):
+class AzimuthalIntegrationTask():
+    """_summary_
+    
+    """
     def getDescription():
         return "Does things"
     def getFuncName():
@@ -19,6 +21,11 @@ class AzimuthalIntegrationTask(Task):
         return {}
     
     def processFile(callParams):
+        """does azimuthal integration for file which is passed and writes results in the results dict.
+
+        Keyword arguments:
+        callParams -- is a list which consists of [the filepath, param object,None,and a instance of a setup azimuthal integrator (see PyFAI documentation:https://pyfai.readthedocs.io/en/master/api/pyFAI.html#module-pyFAI.azimuthalIntegrator)] 
+        """
         filePath, params,data,azimuthalIntegrator = callParams
         #azimuthalIntegrator = params["azimuthalIntegrator"]
         try:
@@ -33,6 +40,13 @@ class AzimuthalIntegrationTask(Task):
                 
                 
     def fillQueue(paths,queue,params):
+        """Fills the multiprocessing Queue with the files that are found in paths.
+
+        Keyword arguments:
+        paths -- path to detector files or directories filled with detector files
+        queue--  Queue of multiprocessing pool
+        """
+        
         nrOfJobs = 0
         for path in paths:
             for filePath in IO_Utils.getFilesThatEndwith(path,XRayDetectorDataParser.getAllowedFormats()):
@@ -41,9 +55,29 @@ class AzimuthalIntegrationTask(Task):
                 nrOfJobs +=1
         return nrOfJobs
                         
-    def runTask(outputPath,elabFtwJson,npt_rad,npt_azim,radial_range,settingJson,filePaths: list,progressBars: list,pool:Pool): 
+    def runTask(outputPath,elabFtwJson,npt_rad,npt_azim,radial_range,azimIntegrator_settingJson,filePaths: list,progressBars: list,pool:Pool): 
+            """Does a azimuthal integration for every detector file in filePaths using multiprocessing.
+
+            Keyword arguments:
+            outputPath -- Path to directory where to store the single results file
+            elabFtwJson -- ELabFTWJson object which was used
+            filePaths -- paths to detector files or directory´s that contain detector files
+            progressBars -- handle to progress bar on gui
+            pool -- multiprocessing pool
+            
+            
+            npt_rad -- Number of points for radial integration
+            npt_azim -- Number of points for 2D integration
+            radial_range -- Radial range in which to integrate 
+            azimIntegrator_settingJson -- Path to json file which contains the settings for the azimuthalIntegrator
+            
+            For more Information see: https://pyfai.readthedocs.io/en/master/api/pyFAI.html#module-pyFAI.azimuthalIntegrator 
+            
+            """ 
+
+        
             executionStart = time.time()   
-            azimuthalIntegrator = AzimuthalIntegrator(settingJson=settingJson,args = [npt_rad,npt_azim,radial_range])     
+            azimuthalIntegrator = AzimuthalIntegrator(azimIntegrator_settingJson=azimIntegrator_settingJson,args = [npt_rad,npt_azim,radial_range])     
             
              #get logger which is used by the manager
             pool.reinitialize([azimuthalIntegrator],3)#very unclean
@@ -57,7 +91,7 @@ class AzimuthalIntegrationTask(Task):
             manager = pool.getManager()
             
             queue =  pool.getQueue()
-            settings = json.load(open(settingJson))
+            settings = json.load(open(azimIntegrator_settingJson))
             params = {"logger":logger,"azimuthalIntegrator":None,
                                    "results":manager.dict({"units":TaskConfigs.AzimuthalIntegrationTask_Config.units,
                                     "settings":[{"pyFai_setting_json":settings}|{"npt_rad":npt_rad,"npt_azim":npt_azim,"radial_range":radial_range}]})

@@ -2,8 +2,24 @@ import fabio
 import numpy as np
 
 def loadDetectorFileRaw(path):
+    """Loads Detector file
+
+    Args:
+        path (string): path to detector file
+
+    Returns:
+        fabioimage: return the data in an fabioimage
+    """
     return fabio.open(path)
 def loadAzimuthalIntegrationDataFile(params):
+    """Loads a .azim file and returns it in the format required by PseudoVoigtFitTask 
+
+    Args:
+        params (dictionary): setup parameters see source code
+
+    Returns:
+        dictionary: Returns azimuthal integration in required format
+    """
     azimuthalIntegrationData = []
     pathToAzimuthalFile = params["path"]
     precision = params["precision"]
@@ -19,4 +35,9 @@ def loadAzimuthalIntegrationDataFile(params):
     return azimuthalIntegrationData
     
 def getAllowedFormats():
-    return [".cbf",".tif"]
+    """Returns a list of detector file types that are supported by this software
+
+    Returns:
+        list: list of supported file endings
+    """
+    return [".cbf",".tif"] #fabio is capeble of many more types and this software as well expect types that use multiimages

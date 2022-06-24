@@ -9,5 +9,5 @@ if __name__ == '__main__':
 
     core = Core()
     gui = GUI(core.getParamObj(),core)
-    core.shutdown()
     core.run()
+    core.shutdown()

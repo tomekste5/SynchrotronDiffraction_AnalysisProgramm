@@ -6,7 +6,7 @@ class AzimuthalIntegrationTask_Config():
     taskName = "azimuthal_integration"
     fileName_prefix = "AztimuthalIntegration"
     
-    taskDescription = "Does things"
+    taskDescription = "Does a azimuthal integration of XDR-Detector data"
     taskDependencies = {}
     
     precision = np.longdouble
@@ -22,7 +22,7 @@ class PseudoVoigtFitTask_Config():
     taskName = "pseudoVoigt_fit"
     fileName_prefix = "pseudoVoigtFit"
     
-    taskDescription = "Does things"
+    taskDescription = "Does a fit of a PseudoVoigt function to accurately fit peak in 2 Theta domain"
     taskDependencies = {AzimuthalIntegrationTask_Config.taskName :1}
     
     precision = np.longdouble
@@ -38,7 +38,7 @@ class AxisTransformFitTask_Config():
     taskName = "axisTransform_fit"
     fileName_prefix = "AxisTransformFit"
     
-    taskDescription = "Does things"
+    taskDescription = "Does a fit of the strain ellipse to get strain values in xx,zz,xz axis and calculates stresses"
     taskDependencies = {PseudoVoigtFitTask_Config.taskName:1}
     
     precision = np.longdouble
@@ -50,8 +50,8 @@ class AxisTransformFitTask_Config():
     loadFunction = PickleParser.loadPickle
     saveFunctions=[CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory,PickleParser.writePickle_single,JsonParser.saveSettings_single,JsonParser.writeJson_single]
     
-    lambdaFileNr = lambda path: path[-9:-4]
-    lambdaDirectoryNr = lambda path: path[-15:-10]
+    lambdaFileNr = lambda path: path[-9:-4] #to eval Z pos  (index of Z pos array )
+    lambdaDirectoryNr = lambda path: path[-15:-10] #to eval X pos (index of X pos array )
     
     loggingLevel = logging.INFO
         

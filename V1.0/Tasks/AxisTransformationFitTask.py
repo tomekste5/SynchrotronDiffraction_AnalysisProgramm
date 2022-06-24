@@ -4,7 +4,6 @@ from IO import IO_Utils
 
 import time
 
-from Tasks.Task import Task
 import numpy as np
 
 from Multiprocessing.Pool import Pool
@@ -13,7 +12,7 @@ from IO.Parser import XRayDetectorDataParser
 from libarys import AxisTransformFit
 import json
 
-class AxisTransformationTask(Task):
+class AxisTransformationTask():
     
     def runTask():
         pass
@@ -28,9 +27,15 @@ class AxisTransformationTask(Task):
         
     
     def doAxisTransformation(callParams):
-        file, params, voigtFitData= callParams[:3]
+        """Does AxisTransformation for every file which is passed and writes results in the results dict.
+
+        Args:
+            callParams (list): [dictionary contains path to file, parameters required to do the fit, results from PseudoVoigtFit]
+            
+        """
+        file, params, pseudoVoigtFitData= callParams[:3]
         try:
-            azimuthalAngles,x0,x0_err= np.array([voigtFitData[i]["azimAngle"] for i in range(len(voigtFitData))]),np.array([TaskConfigs.AxisTransformFitTask_Config.precision(voigtFitData[i]["x0"]) for i in range(len(voigtFitData))]),np.array([voigtFitData[i]["x0_Err"] for i in range(len(voigtFitData))])
+            azimuthalAngles,x0,x0_err= np.array([pseudoVoigtFitData[i]["azimAngle"] for i in range(len(pseudoVoigtFitData))]),np.array([TaskConfigs.AxisTransformFitTask_Config.precision(pseudoVoigtFitData[i]["x0"]) for i in range(len(pseudoVoigtFitData))]),np.array([pseudoVoigtFitData[i]["x0_Err"] for i in range(len(pseudoVoigtFitData))])
             
             fitData = AxisTransformFit.doFit(azimuthalAngles=azimuthalAngles,x0=x0,x0_err=x0_err,d0=params["d0"],wavelength=TaskConfigs.AxisTransformFitTask_Config.precision(params["wavelength"]))
 
@@ -41,15 +46,28 @@ class AxisTransformationTask(Task):
             strainZZ = fitData["strainZZ"]
             strainXZ = fitData["strainXZ"]
 
-            principalStresses = AxisTransformFit.calculatePrincipalStresses(E=E,poisson=poisson,strainYY=strainXX,strainZZ=strainZZ,strainYZ=strainXZ)                
+            principalStresses = AxisTransformFit.calculatePrincipalStresses(E=E,poissonNumbers=poisson,strainXX=strainXX,strainZZ=strainZZ,strainXZ=strainXZ)                
             
-            params["results"][file] = [{"File":file,"Z_positions":params["Z_positions"][int(TaskConfigs.AxisTransformFitTask_Config.lambdaFileNr(file))-1],"X_positions":params["X_positions"][int(TaskConfigs.AxisTransformFitTask_Config.lambdaDirectoryNr(file))-1]}| fitData |principalStresses| {"FWHM":np.mean(np.array([voigtFitData[i]["FWHM"] for i in range(len(voigtFitData))])),"A":np.mean(np.array([voigtFitData[i]["A"] for i in range(len(voigtFitData))])),"x0":np.mean(np.array([voigtFitData[i]["x0"] for i in range(len(voigtFitData))]))}]
+            params["results"][file] = [{"File":file,"Z_positions":params["Z_positions"][int(TaskConfigs.AxisTransformFitTask_Config.lambdaFileNr(file))-1],"X_positions":params["X_positions"][int(TaskConfigs.AxisTransformFitTask_Config.lambdaDirectoryNr(file))-1]}| fitData |principalStresses| {"FWHM":np.mean(np.array([pseudoVoigtFitData[i]["FWHM"] for i in range(len(pseudoVoigtFitData))])),"A":np.mean(np.array([pseudoVoigtFitData[i]["A"] for i in range(len(pseudoVoigtFitData))])),"x0":np.mean(np.array([pseudoVoigtFitData[i]["x0"] for i in range(len(pseudoVoigtFitData))]))}]
     
             params["logger"].info("Fitted File: " + file)
         except FileNotFoundError:
             params["logger"].error("FileNotFoundError: No such file or directory: " +file)   
     
     def fillQueue(funcRet,filePaths,queue,params):
+        """Fills the multiprocessing Queue with the files that are found in paths
+
+        Args:
+            funcRet (dictionary): Dictionary which contains the results of tasks defined as dependency´s in TaskConfig
+            filePaths (list): paths to detector files or directory´s that contain detector files
+            queue (Multiprocessing.Queue): Queue of multiprocessing pool
+            params (dictionary): Dictionary that contains the Results array, parameters required for the AxisTransformationFit and the logger
+
+        Returns:
+            int: how many file need to be processed, referred by jobs.
+        """
+        
+        
         nrOfTasks = 0
         loadedPickleFiles = {}
         for path in filePaths:
@@ -73,8 +91,27 @@ class AxisTransformationTask(Task):
         params["results"]["settings"] = [axisTranformationFit_settings | {TaskConfigs.PseudoVoigtFitTask_Config.taskName:voigtFit_settings}]
         return nrOfTasks
     
-    def runTask(outputPath,elabFtwJson,filePaths,wavelength,peak,E,Possions,d0,Z_positions,X_positions,progressBars: list,pool: Pool,funcRet: dict):
-        
+    def runTask(outputPath,elabFtwJson,filePaths,wavelength,peak,E,poissonNumbers,d0,Z_positions,X_positions,progressBars: list,pool: Pool,funcRet: dict):
+        """Does a axisTransformation fit for every file to get strain/stress values in axis direction by using multiprocessing.
+
+        Args:
+            outputPath (string):  Path to directory where to store the single results file
+            elabFtwJson (dictionary):  ELabFTWJson object which was used
+            filePaths (list): Paths to detector files or directory´s that contain detector files
+            wavelength (chosen precision): Wavelength used during the experiment
+            peak (int): For which peak to calculate the lattice distance (Array index) 
+            E (list): List of E-Modules for different lattice plane
+            poissonNumbers (list): List of poisson numbers for different lattice plane
+            d0 (chosen precision): lattice distance in unstressed state
+            Z_positions (list): List of Z positions
+            X_positions (_type_): List of X positions
+            progressBars (list): Handle to progress bar on gui
+            pool (Pool): multiprocessing pool
+            funcRet (dict): Dictionary which contains the results of tasks PseudoVoigtFitTask
+
+        Returns:
+            dictionary: results in standardized format (See documentation)
+        """
         execStart_time = time.time() 
         
         #get logger which is used by the manager
@@ -91,8 +128,8 @@ class AxisTransformationTask(Task):
         eLabFtwInput = json.load(open(elabFtwJson)) if elabFtwJson != None else None
         
         params = {"logger":logger,"results":m.dict({"units":TaskConfigs.AxisTransformFitTask_Config.units,
-                                                             "settings":[{"wavelength":wavelength,"E-Modules":E,"possions":Possions,"d0":d0} | {"ElabFtwJson":eLabFtwInput}]})
-                         ,"d0":d0,"wavelength":wavelength,"Z_positions":Z_positions,"X_positions":X_positions,"E_Modules":E[peak],"Possion_Numbers":Possions[peak]}
+                                                             "settings":[{"wavelength":wavelength,"E-Modules":E,"possions":poissonNumbers,"d0":d0} | {"ElabFtwJson":eLabFtwInput}]})
+                         ,"d0":d0,"wavelength":wavelength,"Z_positions":Z_positions,"X_positions":X_positions,"E_Modules":E[peak],"Possion_Numbers":poissonNumbers[peak]}
 
         #To ensure processing doesnt start while filling the Queue (could result in blocking each other, so low speed)
         pool.idle()

@@ -19,10 +19,10 @@ import sys
 import os
 import numpy as np
 
-from Utils.Param import param
+from Utils.Param import Param
 from Core.CoreModule import Core
-    
-    
+
+
 # constance for all future inputs in the gui
 
 precision = np.longdouble
@@ -32,7 +32,7 @@ precision = np.longdouble
 
 
 class GUI:
-    def __init__(self, param: param, core: Core):
+    def __init__(self, param: Param, core: Core):
         
         
         # main settings of the interface
@@ -152,7 +152,7 @@ class GUI:
             param.setOutputDirectory(outputDirectory)
             
         def openAzimJson():
-            azimJsonPath = filedialog.askopenfilename()
+            azimJsonPath = filedialog.askopenfile()
             param.setPathToAzimJson(azimJsonPath)
             
         def selectDetectorData():
@@ -223,9 +223,10 @@ class GUI:
             radrangep = [precision(radRange) for radRange in valueEntryRadialRange.split(",")]
             param.setRadialRange(radrangep)
             
-            core.run()
             progressbar.start()
-            param.setProgressBarHandles()
+            param.setProgressBarHandles([progressbar])
+            
+            core.run()
             
             
         # defining method to stop the process and close the window, used in buttonStop
@@ -264,5 +265,3 @@ class GUI:
         
 
         gui_main.mainloop()
-        
-#GUI(Param(),Core())
