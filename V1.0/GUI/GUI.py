@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Wed May 25 09:42:29 2022
 
@@ -21,10 +19,15 @@ import numpy as np
 
 from Utils.Param import Param
 from Core.CoreModule import Core
-
+"""
+import Param
+    
+class Core():
+    def run():
+        pass
 
 # constance for all future inputs in the gui
-
+"""
 precision = np.longdouble
 
 
@@ -145,6 +148,30 @@ class GUI:
         EntryPeak.place( x = 710 , y = 173 , width = 100 , height = 25)
         
         
+        # defining vars used in the checkbuttons
+        
+        PseudoVoigtFitVar = "PseudoVoigtFit"
+        
+        AzimuthalIntegrationVar = "AzimuthalIntegration"
+        
+        AxistransformationVar = "Axistransformation"
+        
+        
+        #Checkbuttons
+        
+        CheckbuttonPseudoVoigtFit = tk.Checkbutton(gui_main,text="PseudoVoigt Fit",font="Arial 14",variable=PseudoVoigtFitVar)
+        #CheckbuttonPseudoVoigtFit.place(x=,y=)
+        param.setTasks(PseudoVoigtFitVar)
+        
+        CheckbuttonAzimuthalIntegration = tk.Checkbutton(gui_main,text="Azimuthal Integration",font="Arial 14",variable=AzimuthalIntegrationVar)
+        #CheckbuttonAzimuthalIntegration.place(x=,y=)
+        param.setTasks(AzimuthalIntegrationVar)
+
+        CheckbuttonAxistransformation = tk.Checkbutton(gui_main,text="Axistransformation",font="Arial 14",variable=AxistransformationVar)
+        #CheckbuttonAxistransformation.place(x=,y=)
+        param.setTasks(AxistransformationVar)
+
+        
         # defining all methonds used in the buttons to chose input and output files
         
         def chooseOutputDirectory():
@@ -184,8 +211,9 @@ class GUI:
         # starting the process and saving the values of every entry in the Param class
         
         def startProgressbar():
-            eModules = [precision(eModule) for eModule in valueEntryEModules.split(",")]
+            eModules = [precision(eModule) for eModule in valueEntryEModules]
             param.setEModules(eModules)
+            param.getEModules.split(",")
            
             possionszahlen = [precision(possionszahl) for possionszahl in valueEntryPossionszahlen.split(",")]
             param.setPoissonNumbers(possionszahlen)
@@ -265,3 +293,5 @@ class GUI:
         
 
         gui_main.mainloop()
+        
+#GUI(Param(),Core())

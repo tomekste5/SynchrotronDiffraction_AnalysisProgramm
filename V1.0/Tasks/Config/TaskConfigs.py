@@ -1,5 +1,5 @@
 import numpy as np
-from IO.Parser import CsvParser,PickleParser,XRayDetectorDataParser,JsonParser
+from IO.Parser import CsvParser, MatlabParser,PickleParser,XRayDetectorDataParser,JsonParser
 import logging
 
 
@@ -37,7 +37,7 @@ class PseudoVoigtFitTask_Config():
              | {"LorCoeff":"unknown","A":"xray count","x0":"2 Theta","FWHM":"unknown","LorCoeff_Err":"unknown","A_Err":"xray count","x0_Err":"°","FWHM_Err":"unkown"}]
     
     loadFunction = XRayDetectorDataParser.loadAzimuthalIntegrationDataFile
-    saveFunctions = [CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory,PickleParser.writePickle_single,JsonParser.saveSettings_single,JsonParser.writeJson_single]
+    saveFunctions = [CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory,PickleParser.writePickle_single,JsonParser.saveSettings_single,JsonParser.writeJson_single,MatlabParser.writeMatV5_single]
     
     loggingLevel = logging.INFO
 
@@ -55,7 +55,7 @@ class AxisTransformFitTask_Config():
              | {"FWHM":"unknown","A":"1","x0":"2 Theta"}]
     
     loadFunction = PickleParser.loadPickle
-    saveFunctions=[CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory,PickleParser.writePickle_single,JsonParser.saveSettings_single,JsonParser.writeJson_single]
+    saveFunctions=[CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory,PickleParser.writePickle_single,JsonParser.saveSettings_single,JsonParser.writeJson_single,MatlabParser.writeMatV5_single]
     
     lambdaFileNr = lambda path: path[-9:-4] #to eval Z pos  (index of Z pos array )
     lambdaDirectoryNr = lambda path: path[-15:-10] #to eval X pos (index of X pos array )

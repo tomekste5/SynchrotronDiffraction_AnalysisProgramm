@@ -27,10 +27,8 @@ class AzimuthalIntegrationTask():
         callParams -- is a list which consists of [the filepath, param object,None,and a instance of a setup azimuthal integrator (see PyFAI documentation:https://pyfai.readthedocs.io/en/master/api/pyFAI.html#module-pyFAI.azimuthalIntegrator)] 
         """
         filePath, params,data,azimuthalIntegrator = callParams
-        #azimuthalIntegrator = params["azimuthalIntegrator"]
         try:
             detectorData = TaskConfigs.AzimuthalIntegrationTask_Config.loadFunction(filePath)
-            params["logger"].info('Starting to integrate: ' + (filePath))
             azimuthalIntegrationData = azimuthalIntegrator.integrate2D(detectorData,os.path.splitext(filePath)[0] + ".azim")
 
             params["results"][filePath] = azimuthalIntegrationData

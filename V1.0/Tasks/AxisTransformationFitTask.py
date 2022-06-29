@@ -87,7 +87,7 @@ class AxisTransformationTask():
                 
                 
         axisTranformationFit_settings = params["results"]["settings"][0] #
-        voigtFit_settings = loadedPickleFiles[file]["settings"][0] if loadedPickleFiles != {} else  funcRet[TaskConfigs.PseudoVoigtFitTask_Config.taskName]["settings"][0]
+        voigtFit_settings = loadedPickleFiles["settings"][0] if loadedPickleFiles != {} else  funcRet[TaskConfigs.PseudoVoigtFitTask_Config.taskName]["settings"][0]
         params["results"]["settings"] = [axisTranformationFit_settings | {TaskConfigs.PseudoVoigtFitTask_Config.taskName:voigtFit_settings}]
         return nrOfTasks
     
