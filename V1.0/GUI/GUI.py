@@ -287,12 +287,13 @@ class GUI:
             peakp = precision([EntryPeak.get()])[0]
             param.setPeak(peakp)
             test = EntryRadSteps.get()
-            radstepsp = np.array(EntryRadSteps.get().split(","),dtype='|S10').astype(np.longdouble)[0]
+            radstepsp = np.array(Entrynptazim.get().split(","),dtype='|S10').astype(np.longdouble)[0]
+            print(radstepsp)
             param.setRadSteps(radstepsp)
             
             radrangep = [precision(radRange) for radRange in EntryRadialRange.get().split(",")]
             param.setRadialRange(tuple(radrangep))
-            nptAzim =  np.array(Entrynptazim.get().split(","),dtype='|S10').astype(np.longdouble)[0]
+            nptAzim =  np.array(Entrynptazim.get().split(","),dtype='|S10').astype(np.longdouble)[0].item()
             print(nptAzim)
             param.setNptAzim(nptAzim)
             
