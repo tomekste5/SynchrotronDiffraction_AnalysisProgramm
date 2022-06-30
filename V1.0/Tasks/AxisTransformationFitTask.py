@@ -140,6 +140,7 @@ class AxisTransformationTask():
         
         while(len(params["results"].keys()) < nrOfTasks):
             time.sleep(1)
+            progressBars[0]["value"] = (len(params["results"].keys())/(nrOfTasks+1) *100)
             logger.info("Reporting progress:    "+str(((len(params["results"].keys())/(nrOfTasks+1) *100)))+ "%")
             
         
