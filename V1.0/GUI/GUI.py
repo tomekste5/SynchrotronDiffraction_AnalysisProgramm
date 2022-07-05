@@ -17,13 +17,12 @@ import json
 
 import sys
 import os
-from typing_extensions import IntVar
 import numpy as np
 
 from Utils.Param import Param
 from Core.CoreModule import Core
 
-# constance for all future inputs in the gui
+# constants for all future inputs in the gui
 
 precision = np.longdouble
 
@@ -43,7 +42,7 @@ class GUI:
         #gui_main.resizable(width=0,height=0)
 
         
-        # configuration of the labels and entrys for the integration settings
+        # configuration of the labels and entries for the integration settings
         
         labelIntegrationSettings = tk.Label(gui_main,text="Integration Settings: ",font="Arial 16")
         labelIntegrationSettings.grid(row=0,column=1,pady=14)
