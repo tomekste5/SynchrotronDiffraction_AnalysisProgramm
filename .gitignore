@@ -35,3 +35,12 @@ V1.0/Tasks/__pycache__/PseudoVoigtFitTask.cpython-39.pyc
 V1.0/Tasks/__pycache__/TaskRegister.cpython-39.pyc
 V1.0/Tasks/Config/__pycache__/TaskConfigs.cpython-39.pyc
 V1.0/Utils/__pycache__/Param.cpython-39.pyc
+V1.0/GUI/__pycache__/GUI.cpython-39.pyc
+V1.0/GUI/__pycache__/GUI.cpython-39.pyc
+V1.0/IO/__pycache__/IO_Utils.cpython-39.pyc
+V1.0/libarys/__pycache__/AzimuthalIntegrator.cpython-39.pyc
+V1.0/Tasks/__pycache__/AxisTransformationFitTask.cpython-39.pyc
+V1.0/Tasks/__pycache__/AzimuthalIntegrationTask.cpython-39.pyc
+V1.0/Tasks/__pycache__/PseudoVoigtFitTask.cpython-39.pyc
+V1.0/Tasks/__pycache__/TaskRegister.cpython-39.pyc
+V1.0/Utils/__pycache__/Param.cpython-39.pyc
