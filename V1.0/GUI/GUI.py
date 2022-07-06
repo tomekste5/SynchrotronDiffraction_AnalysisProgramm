@@ -17,6 +17,7 @@ import json
 import os
 import numpy as np
 from traitlets import default
+import tkfilebrowser
 
 from Utils.Param import Param
 from Core.CoreModule import Core
@@ -202,8 +203,9 @@ class GUI:
             param.setPathToAzimJson(os.path.abspath(azimJsonFile.name))
             
         def selectDetectorData():
-            cbfInputs = filedialog.askopenfilenames()
+            cbfInputs = tkfilebrowser.askopendirnames()
             param.setDirectoryPaths(cbfInputs)
+         
          
          
         def openELabFTW():
@@ -290,18 +292,16 @@ class GUI:
             maxthetap = precision(EntryMaxTheta.get().split(","))[0]
             param.setMaxTheta(maxthetap)
             
-            peakp = precision([EntryPeak.get()])[0]
+            peakp = int(EntryPeak.get())
             param.setPeak(peakp)
 
-            radstepsp = np.array(Entrynptazim.get().split(","),dtype='|S10').astype(np.longdouble)[0]
-            print(radstepsp)
+            radstepsp = int(EntryRadSteps.get())
             param.setRadSteps(radstepsp)
             
             radrangep = [precision(radRange) for radRange in EntryRadialRange.get().split(",")]
             param.setRadialRange(tuple(radrangep))
 
-            nptAzim =  np.array(Entrynptazim.get().split(","),dtype='|S10').astype(np.longdouble)[0].item()
-            print(nptAzim)
+            nptAzim =  int(Entrynptazim.get())
             param.setNptAzim(nptAzim)
             
             progressbar.start()
