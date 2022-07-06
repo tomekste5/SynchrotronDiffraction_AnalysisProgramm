@@ -16,7 +16,6 @@ import json
 
 import os
 import numpy as np
-from traitlets import default
 import tkfilebrowser
 
 from Utils.Param import Param

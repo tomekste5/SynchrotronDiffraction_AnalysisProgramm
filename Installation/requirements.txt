@@ -1,0 +1,6 @@
+numpy==1.23.0
+pandas==1.4.3
+scipy==1.8.1
+fabio==0.14.0
+pyFAI==0.21.3
+tkfilebrowser==2.3.2
