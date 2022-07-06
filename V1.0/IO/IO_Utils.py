@@ -34,4 +34,6 @@ def getFilesThatEndwith(path, fileTypes):
                         graph.append(files[0]+"/"+file)
     if graph == [] and not  os.path.isfile(path):
         raise FileNotFoundError
-    return path if os.path.isfile(path) else graph
+    if os.path.isfile(path):
+        return [path]
+    return graph

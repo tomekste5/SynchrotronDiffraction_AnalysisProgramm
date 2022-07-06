@@ -91,7 +91,7 @@ class AxisTransformationTask():
         params["results"]["settings"] = [axisTranformationFit_settings | {TaskConfigs.PseudoVoigtFitTask_Config.taskName:voigtFit_settings}]
         return nrOfTasks
     
-    def runTask(outputPath,elabFtwJson,filePaths,wavelength,peak,E,poissonNumbers,d0,Z_positions,X_positions,progressBars: list,pool: Pool,funcRet: dict):
+    def runTask(gui,outputPath,elabFtwJson,filePaths,wavelength,peak,E,poissonNumbers,d0,Z_positions,X_positions,progressBars: list,pool: Pool,funcRet: dict):
         """Does a axisTransformation fit for every file to get strain/stress values in axis direction by using multiprocessing.
 
         Args:
@@ -142,6 +142,7 @@ class AxisTransformationTask():
             time.sleep(1)
             progressBars[0]["value"] = (len(params["results"].keys())/(nrOfTasks+1) *100)
             logger.info("Reporting progress:    "+str(((len(params["results"].keys())/(nrOfTasks+1) *100)))+ "%")
+            gui.update()
             
         
         AxisTransformationFit_results =dict(sorted(params["results"].items()))

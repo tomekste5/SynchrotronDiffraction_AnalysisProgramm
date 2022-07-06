@@ -1,3 +1,8 @@
+import numpy as np
+from glob import glob
+import tkinter as tk
+from tkinter import ttk
+
 class Param():
     def __init__(self) -> None:
         
@@ -30,16 +35,14 @@ class Param():
 
         #Positions punkte
         ypunkte=[20, 25, 28, 29, 30, 31, 32, 35, 40]
-        import numpy as np
+        
         ypunkte = np.array(ypunkte) - 30
         zpunkte = np.linspace(-7.06,-7.36,16)
 
         thetav=[1.25,2.5,2.94748158,3.5,3.9,4.3]
         
         self.__EModules  = E
-
         self.__poissonNumbers =poisson
-
         self.__positionsY = ypunkte
         self.__positionsZ =  zpunkte
         self.__minTheta = mintheta
@@ -53,23 +56,23 @@ class Param():
         self.__peak = peak
         self.__d0 = zero
         self.__mode = 1
-        from glob import glob
+        
         self.__directoryPaths = [i for i in glob("/home/tomek/Nextcloud/University/2. FS/EDV/Versuch3/Versuch3/*", recursive = True) if "v3_insitu" in i]#[i for i in glob("F:/NextCloud/University/2. FS/EDV/Versuch3/Versuch3/*/", recursive = True) if "v3_insitu" in i]#["F:/NextCloud/University/2. FS/EDV/Versuch3/Versuch3/v3_insitu_00002/pilatus/v3_insitu_00002_00001.cbf"]
         self.__azimJsonPath = "insitu20x200.azimint.json"
         self.__progressBarHandles = []
         self.__tasks = ["azimuthal_integration","axisTransform_fit","pseudoVoigt_fit"] #"azimuthal_integration""voigt_fit""axisTransform_fit","voigt_fit""azimuthal_integration" "pseudoVoigt_fit" ["azimuthal_integration"]["pseudoVoigt_fit"]"azimuthal_integration","voigt_fit"
         self.__outputDirectory = "/home/tomek/Nextcloud/University/2. FS/EDV/Versuch3/Versuch3/v3insitu_Results_Run_001"#F:/NextCloud/University/2. FS/EDV/Versuch3/Versuch3/v3insitu_Results_Run_001"
         self.__elabFTWJson = "elabFtw.json"
-        import tkinter as tk
-        from tkinter import ttk
-        tkw = tk.Tk()
-        pb = ttk.Progressbar(
-            tkw,
-            orient='horizontal',
-            mode='determinate',
-            length=280
-        )
-        self.__progressBarHandles = [pb]
+        
+        #TODO is this movable to GUI?
+        #tkw = tk.Tk()
+        #pb = ttk.Progressbar(
+        #    tkw,
+        #    orient='horizontal',
+        #    mode='determinate',
+        #    length=280
+        #)
+        #self.__progressBarHandles = [pb]
         
     #Setter
     def setMode(self, mode):
@@ -114,17 +117,14 @@ class Param():
         self.__tasks = tasks
     def setElabFtwJson(self,json):
         self.__elabFTWJson = json        
-        
+    def setGUIInstance(self, guiInstance):
+        self.__GUIInstance = guiInstance
 
     #Getter
     def getElabFtwJson(self):
         return self.__elabFTWJson
     def getMode(self):
         return self.__mode
-    def getIsMultiprocessingAllowed(self):
-        return True
-    def getIsMultithreadingAllowed(self):
-        return True
     def getTasks(self):
         return self.__tasks
     def getEModules(self):
@@ -135,6 +135,8 @@ class Param():
         return self.__positionsY
     def getPositionsZ(self):
         return self.__positionsZ 
+    def getGUIInstance(self):
+        return self.__GUIInstance
     def getMinTheta(self):
         return self.__minTheta 
     def getMaxTheta(self):

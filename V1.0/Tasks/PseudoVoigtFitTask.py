@@ -83,7 +83,7 @@ class PseudoVoigtFitTask():
         
         return nrOfJobs
     
-    def runTask(outputPath,elabFtwJson,minTheta,maxTheta,filePaths: list,thetaAV,peak,progressBars: list,pool: Pool,funcRet: dict):
+    def runTask(gui,outputPath,elabFtwJson,minTheta,maxTheta,filePaths: list,thetaAV,peak,progressBars: list,pool: Pool,funcRet: dict):
         """Does a pseudo-Voigt fit for every file by using multiprocessing.
 
         Args:
@@ -114,7 +114,7 @@ class PseudoVoigtFitTask():
         
         results = manager.dict({"units":TaskConfigs.PseudoVoigtFitTask_Config.units,"settings":[{"minTheta":minTheta,"maxTheta":maxTheta,"peak":peak,"thetaAV":thetaAV}]})
         
-        params = {"logger":logger,"maxTheta":maxTheta,"minTheta":minTheta,"thetaPeak":thetaAV[peak],"results":results}
+        params = {"logger":logger,"maxTheta":maxTheta,"minTheta":minTheta,"thetaPeak":thetaAV[int(peak)],"results":results}
         
         #To ensure processing doesnt start while filling the Queue (could result in blocking each other, so low speed)
         pool.idle()
@@ -127,6 +127,7 @@ class PseudoVoigtFitTask():
             time.sleep(1)
             progressBars[0]["value"] = (len(params["results"].keys())/(nrOfJobs+1) *100)
             logger.info("Reporting progress:    "+str(((len(params["results"].keys())/(nrOfJobs+1) *100)))+ "%")
+            gui.update()
         
         pseudoVoigtFit_results =dict(sorted(params["results"].items()))
         

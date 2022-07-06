@@ -47,13 +47,15 @@ class AzimuthalIntegrationTask():
         
         nrOfJobs = 0
         for path in paths:
-            for filePath in IO_Utils.getFilesThatEndwith(path,XRayDetectorDataParser.getAllowedFormats()):
+            files = IO_Utils.getFilesThatEndwith(path,XRayDetectorDataParser.getAllowedFormats())
+
+            for filePath in files:
                 queue.put([AzimuthalIntegrationTask.processFile,[filePath,params,None]])
                 #AzimuthalIntegrationTask.processFile([filePath,params,None])
                 nrOfJobs +=1
         return nrOfJobs
                         
-    def runTask(outputPath,elabFtwJson,npt_rad,npt_azim,radial_range,azimIntegrator_settingJson,filePaths: list,progressBars: list,pool:Pool): 
+    def runTask(gui,outputPath,elabFtwJson,npt_rad,npt_azim,radial_range,azimIntegrator_settingJson,filePaths: list,progressBars: list,pool:Pool): 
             """Does a azimuthal integration for every detector file in filePaths using multiprocessing.
 
             Keyword arguments:
@@ -106,6 +108,7 @@ class AzimuthalIntegrationTask():
                 time.sleep(1)
                 progressBars[0]["value"] = (len(params["results"].keys())/(nrOfJobs+1) *100)
                 logger.info("Reporting progress:    "+str(((len(params["results"].keys())/(nrOfJobs+1) *100)))+ "%")
+                gui.update()
 
             logger.info("Finished Task in %ss"%(str(time.time()-executionStart))) 
             
