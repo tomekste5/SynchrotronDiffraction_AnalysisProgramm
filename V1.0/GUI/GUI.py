@@ -215,8 +215,8 @@ class GUI:
             if EntryPositionsdatenX.get() == "":
                 EntryPositionsdatenX.insert(0,",".join(map(str,np.arange(paramJson["pos_insitu"]["x_start"]["value"],paramJson["pos_insitu"]["x_end"]["value"],paramJson["pos_insitu"]["x_step"]["value"]/1000))))
                 EntryPositionsdatenZ.insert(0,",".join(map(str,np.arange(paramJson["pos_insitu"]["z_start"]["value"],paramJson["pos_insitu"]["z_end"]["value"],paramJson["pos_insitu"]["z_step"]["value"]/1000))))
-            param.setDirectoryPaths(paramJson["datafiles"].keys())
-            param.setElabFtwJson(paramJson)
+            #param.setDirectoryPaths(paramJson["datafiles"].keys()) TODO:uncomment
+            param.setElabFtwJson(elabJsonPath)
         
         
         # buttons for input and ouput
