@@ -117,7 +117,8 @@ class Param():
         self.__tasks = tasks
     def setElabFtwJson(self,json):
         self.__elabFTWJson = json        
-        
+    def setGUIInstance(self, guiInstance):
+        self.__GUIInstance = guiInstance
 
     #Getter
     def getElabFtwJson(self):
@@ -134,6 +135,8 @@ class Param():
         return self.__positionsY
     def getPositionsZ(self):
         return self.__positionsZ 
+    def getGUIInstance(self):
+        return self.__GUIInstance
     def getMinTheta(self):
         return self.__minTheta 
     def getMaxTheta(self):

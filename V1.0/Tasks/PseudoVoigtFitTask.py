@@ -83,7 +83,7 @@ class PseudoVoigtFitTask():
         
         return nrOfJobs
     
-    def runTask(outputPath,elabFtwJson,minTheta,maxTheta,filePaths: list,thetaAV,peak,progressBars: list,pool: Pool,funcRet: dict):
+    def runTask(gui,outputPath,elabFtwJson,minTheta,maxTheta,filePaths: list,thetaAV,peak,progressBars: list,pool: Pool,funcRet: dict):
         """Does a pseudo-Voigt fit for every file by using multiprocessing.
 
         Args:
@@ -127,6 +127,7 @@ class PseudoVoigtFitTask():
             time.sleep(1)
             progressBars[0]["value"] = (len(params["results"].keys())/(nrOfJobs+1) *100)
             logger.info("Reporting progress:    "+str(((len(params["results"].keys())/(nrOfJobs+1) *100)))+ "%")
+            gui.update()
         
         pseudoVoigtFit_results =dict(sorted(params["results"].items()))
         

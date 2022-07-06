@@ -283,6 +283,8 @@ class GUI:
             starttempp = precision(EntryStartTemp.get().split(","))[0]
             param.setStartTemp(starttempp)
             
+            param.setGUIInstance(gui_main)
+            
             thetaavp = [precision(thetaAV) for thetaAV in EntryThetaav.get().split(",")]
             param.thetaAV(thetaavp)
             
