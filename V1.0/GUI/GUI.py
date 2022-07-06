@@ -17,6 +17,7 @@ import json
 
 import sys
 import os
+from typing_extensions import IntVar
 import numpy as np
 
 from Utils.Param import Param
@@ -252,47 +253,48 @@ class GUI:
         # starting the process and saving the values of every entry in the Param class
         
         def startProgressbar():
-            emoduls = np.fromstring(EntryEModules.get(),sep=",")
+            array = EntryEModules.get().split(",")
+            emoduls = [precision(emodul) for emodul in EntryEModules.get().split(",")]
             param.setEModules(emoduls)
             
-            possionszahlen = np.fromstring(valueEntryPossionszahlen.get(),sep=",")
+            possionszahlen = [precision(possionszahl) for possionszahl in EntryPossionszahlen.get().split(",")]
             param.setPoissonNumbers(possionszahlen)
             
-            d0p = float(Entryd0.get())
+            d0p = precision(Entryd0.get().split(","))[0]
             param.setD0(d0p)
             
-            wavelengthp = float(EntryStartTemp.get())
+            wavelengthp = precision(EntryWavelength.get().split(","))[0]
             param.setWavelength(wavelengthp)
             
-            positionsdatenxp = np.fromstring(EntryPositionsdatenX.get(),sep=",")
+            positionsdatenxp = [precision(positionsdatenX) for positionsdatenX in EntryPositionsdatenX.get().split(",")]
             param.setPositionsX(positionsdatenxp)
             
-            positionsdatenyp = np.fromstring(EntryPositionsdatenY.get(),sep=",")
+            positionsdatenyp = [precision(positionsdatenY) for positionsdatenY in EntryPositionsdatenY.get().split(",")]
             param.setPositionsY(positionsdatenyp)
             
-            starttempp = float(EntryWavelength.get())
+            starttempp = precision(EntryStartTemp.get().split(","))[0]
             param.setStartTemp(starttempp)
             
-            thetaavp = np.fromstring(EntryThetaav.get(),sep=",")
+            thetaavp = [precision(thetaAV) for thetaAV in EntryThetaav.get().split(",")]
             param.thetaAV(thetaavp)
             
-            minthetap = float(EntryMinTheta.get())
+            minthetap = precision(EntryMinTheta.get().split(","))[0]
             param.setMinTheta(minthetap)
             
-            maxthetap =  float(EntryMaxTheta.get())
+            maxthetap = precision(EntryMaxTheta.get().split(","))[0]
             param.setMaxTheta(maxthetap)
             
-            peakp = int(EntryPeak.get())
+            peakp = precision([EntryPeak.get()])[0]
             param.setPeak(peakp)
-            
-            
-            radstepsp = int(EntryRadSteps.get())
+            test = EntryRadSteps.get()
+            radstepsp = np.array(Entrynptazim.get().split(","),dtype='|S10').astype(np.longdouble)[0]
+            print(radstepsp)
             param.setRadSteps(radstepsp)
             
-            radrangep = np.fromstring(EntryRadialRange.get(),sep=",")
-            param.setRadialRange((int(radrangep[0]),int(radrangep[1])))
-            
-            nptAzim =  int(Entrynptazim.get())
+            radrangep = [precision(radRange) for radRange in EntryRadialRange.get().split(",")]
+            param.setRadialRange(tuple(radrangep))
+            nptAzim =  np.array(Entrynptazim.get().split(","),dtype='|S10').astype(np.longdouble)[0].item()
+            print(nptAzim)
             param.setNptAzim(nptAzim)
             
             progressbar.start()
