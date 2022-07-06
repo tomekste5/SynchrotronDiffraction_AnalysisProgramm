@@ -43,7 +43,7 @@ class PseudoVoigtFitTask():
                 intensitys = azimuthalIntegrationData[0][azimuthalAngle][interval]
                 thetaAngles = azimuthalIntegrationData[1][interval]
                 
-                azimuthalAngle = TaskConfigs.PseudoVoigtFitTask_Config.precision(np.round(azimuthalIntegrationData[2][azimuthalAngle]))
+                azimuthalAngle = np.round(azimuthalIntegrationData[2][azimuthalAngle]).astype(TaskConfigs.PseudoVoigtFitTask_Config.precision)
                 
                 row_fitData.append({"FilePath":filePath,"azimAngle":azimuthalAngle} | PseudoVoigtFit.doFit(intensitys,thetaAngles,params["thetaPeak"]))
                 
