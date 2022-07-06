@@ -114,7 +114,7 @@ class PseudoVoigtFitTask():
         
         results = manager.dict({"units":TaskConfigs.PseudoVoigtFitTask_Config.units,"settings":[{"minTheta":minTheta,"maxTheta":maxTheta,"peak":peak,"thetaAV":thetaAV}]})
         
-        params = {"logger":logger,"maxTheta":maxTheta,"minTheta":minTheta,"thetaPeak":thetaAV[peak],"results":results}
+        params = {"logger":logger,"maxTheta":maxTheta,"minTheta":minTheta,"thetaPeak":thetaAV[int(peak)],"results":results}
         
         #To ensure processing doesnt start while filling the Queue (could result in blocking each other, so low speed)
         pool.idle()
