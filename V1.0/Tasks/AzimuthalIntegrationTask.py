@@ -47,7 +47,9 @@ class AzimuthalIntegrationTask():
         
         nrOfJobs = 0
         for path in paths:
-            for filePath in IO_Utils.getFilesThatEndwith(path,XRayDetectorDataParser.getAllowedFormats()):
+            files = IO_Utils.getFilesThatEndwith(path,XRayDetectorDataParser.getAllowedFormats())
+
+            for filePath in files:
                 queue.put([AzimuthalIntegrationTask.processFile,[filePath,params,None]])
                 #AzimuthalIntegrationTask.processFile([filePath,params,None])
                 nrOfJobs +=1
