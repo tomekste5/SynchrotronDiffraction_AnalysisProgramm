@@ -11,7 +11,7 @@ class AzimuthalIntegrationTask_Config():
     taskDescription = "Does a azimuthal integration of XDR-Detector data" #short Description currently unimplemented
     taskDependencies = {} #define if Task is dependent on other tasks following structure: [taskname:1] or [taskname:0] when the return values should always be ignored and instead load the written files with the results. 
     
-    precision = np.longdouble #which datatype to use !ONLY NUMPY DATATYPES!
+    precision = np.float64 #which datatype to use !ONLY NUMPY DATATYPES!
     units = [{"FilePath":"string","azimAngle":"°"} #Units
              | {"LorCoeff":"unknown","A":"xray count","x0":"2 Theta","FWHM":"unknown","LorCoeff_Err":"unknown","A_Err":"xray count","x0_Err":"°","FWHM_Err":"unkown"}]
     
@@ -32,7 +32,7 @@ class PseudoVoigtFitTask_Config():
     taskDescription = "Does a fit of a PseudoVoigt function to accurately fit peak in 2 Theta domain"
     taskDependencies = {AzimuthalIntegrationTask_Config.taskName :1}
     
-    precision = np.longdouble
+    precision = np.float64
     units = [{"FilePath":"string","azimAngle":"°"}
              | {"LorCoeff":"unknown","A":"xray count","x0":"2 Theta","FWHM":"unknown","LorCoeff_Err":"unknown","A_Err":"xray count","x0_Err":"°","FWHM_Err":"unkown"}]
     
@@ -48,7 +48,7 @@ class AxisTransformFitTask_Config():
     taskDescription = "Does a fit of the strain ellipse to get strain values in xx,zz,xz axis and calculates stresses"
     taskDependencies = {PseudoVoigtFitTask_Config.taskName:1}
     
-    precision = np.longdouble
+    precision = np.float64
     units = [{"File":"filepath","Z_positions":"mm","X_positions":"mm"}
              | {"strainYY":"1","strainZZ":"1","strainYZ":"1","strainYY_Err":"1","strainZZ_Err":"1","strainYZ_Err":"1"}
              | {"stressXX":"Pa","stressYY":"Pa","stressYZ":"Pa","stressHydro":"Pa","stressMises":"Pa"}

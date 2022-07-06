@@ -23,7 +23,7 @@ from Utils.Param import Param
 from Core.CoreModule import Core
 
 # constants for all future inputs in the gui
-precision = np.longdouble
+precision = np.float64
 
 
 # configuration of the gui
