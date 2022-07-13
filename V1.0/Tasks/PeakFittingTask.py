@@ -1,7 +1,6 @@
 import time
 
 import numpy as np
-from scipy.optimize import curve_fit
 
 from Tasks.Config import TaskConfigs
 from IO import IO_Utils
@@ -10,16 +9,16 @@ from Multiprocessing.Pool import Pool
 from libarys import PseudoVoigtFit
 
 
-class PseudoVoigtFitTask():
+class PeakFittingTask():
     def getDescription():
-        return TaskConfigs.PseudoVoigtFitTask_Config.taskDescription
+        return TaskConfigs.peakFittingTask_Config.taskDescription
     def getFuncName():
-        return TaskConfigs.PseudoVoigtFitTask_Config.taskName 
+        return TaskConfigs.peakFittingTask_Config.taskName 
     def getDependencies():
-        return TaskConfigs.PseudoVoigtFitTask_Config.taskDependencies
+        return TaskConfigs.peakFittingTask_Config.taskDependencies
     
                     
-    def doPseudoVoigtFitting(callParams):
+    def doPeakFitting(callParams):
         """Does pseudo-voigt fit for every file which is passed and writes results in the results dict.
 
         Args:
@@ -33,8 +32,8 @@ class PseudoVoigtFitTask():
             #if azimuthalIntegrationData not loaded yet load it
             if(azimuthalIntegrationData == None):
                 pathToAzimFile =filePath.replace(filePath.split(".")[-1],"azim")
-                loadParams = {"path":pathToAzimFile, "precision":TaskConfigs.PseudoVoigtFitTask_Config.precision}
-                azimuthalIntegrationData =TaskConfigs.PseudoVoigtFitTask_Config.loadFunction(loadParams) #use load function defined in tasks configs
+                loadParams = {"path":pathToAzimFile, "precision":TaskConfigs.peakFittingTask_Config.precision}
+                azimuthalIntegrationData =TaskConfigs.peakFittingTask_Config.loadFunction(loadParams) #use load function defined in tasks configs
             
             interval = (azimuthalIntegrationData[1] < params["maxTheta"]) & (params["minTheta"] <azimuthalIntegrationData[1]) # get theta interval from minTheta to maxTheta
             
@@ -43,7 +42,7 @@ class PseudoVoigtFitTask():
                 intensitys = azimuthalIntegrationData[0][azimuthalAngle][interval]
                 thetaAngles = azimuthalIntegrationData[1][interval]
                 
-                azimuthalAngle = np.round(azimuthalIntegrationData[2][azimuthalAngle]).astype(TaskConfigs.PseudoVoigtFitTask_Config.precision)
+                azimuthalAngle = np.round(azimuthalIntegrationData[2][azimuthalAngle]).astype(TaskConfigs.peakFittingTask_Config.precision)
                 
                 row_fitData.append({"FilePath":filePath,"azimAngle":azimuthalAngle} | PseudoVoigtFit.doFit(intensitys,thetaAngles,params["thetaPeak"]))
                 
@@ -72,9 +71,9 @@ class PseudoVoigtFitTask():
         for path in filePaths:
             for filePath in IO_Utils.getFilesThatEndwith(path,XRayDetectorDataParser.getAllowedFormats()):
                 try:
-                    queue.put([PseudoVoigtFitTask.doPseudoVoigtFitting, [filePath,params,funcRet[TaskConfigs.AzimuthalIntegrationTask_Config.taskName][filePath]]])
+                    queue.put([PeakFittingTask.doPeakFitting, [filePath,params,funcRet[TaskConfigs.AzimuthalIntegrationTask_Config.taskName][filePath]]])
                 except KeyError:
-                    queue.put([PseudoVoigtFitTask.doPseudoVoigtFitting, [filePath,params,None]])
+                    queue.put([PeakFittingTask.doPeakFitting, [filePath,params,None]])
                 nrOfJobs +=1
                 
         azimuthalIntegration_settings = params["results"]["settings"][0]
@@ -105,21 +104,21 @@ class PseudoVoigtFitTask():
         execTime_start = time.time() 
         
         logger = pool.getLogger()
-        logger.setLevel(TaskConfigs.PseudoVoigtFitTask_Config.loggingLevel)
+        logger.setLevel(TaskConfigs.peakFittingTask_Config.loggingLevel)
         
-        logger.info("Starting Task %s..."%(TaskConfigs.PseudoVoigtFitTask_Config.taskName))
+        logger.info("Starting Task %s..."%(TaskConfigs.peakFittingTask_Config.taskName))
         
         manager = pool.getManager()
         queue = pool.getQueue()
         
-        results = manager.dict({"units":TaskConfigs.PseudoVoigtFitTask_Config.units,"settings":[{"minTheta":minTheta,"maxTheta":maxTheta,"peak":peak,"thetaAV":thetaAV}]})
+        results = manager.dict({"units":TaskConfigs.peakFittingTask_Config.units,"settings":[{"minTheta":minTheta,"maxTheta":maxTheta,"peak":peak,"thetaAV":thetaAV}]})
         
         params = {"logger":logger,"maxTheta":maxTheta,"minTheta":minTheta,"thetaPeak":thetaAV[int(peak)],"results":results}
         
         #To ensure processing doesnt start while filling the Queue (could result in blocking each other, so low speed)
         pool.idle()
         #Fill pool queue with jobs
-        nrOfJobs =  PseudoVoigtFitTask.fillQueue(funcRet,filePaths,queue,params)
+        nrOfJobs =  PeakFittingTask.fillQueue(funcRet,filePaths,queue,params)
         #Release the worker processes to start processing the jobs
         pool.start()
         
@@ -131,8 +130,8 @@ class PseudoVoigtFitTask():
         
         pseudoVoigtFit_results =dict(sorted(params["results"].items()))
         
-        save_params = {"outputPath":outputPath,"dict": pseudoVoigtFit_results,"prefix":TaskConfigs.PseudoVoigtFitTask_Config.fileName_prefix,"precision":TaskConfigs.PseudoVoigtFitTask_Config.precision,"overwrite":False}
-        for saveDict in TaskConfigs.PseudoVoigtFitTask_Config.saveFunctions:
+        save_params = {"outputPath":outputPath,"dict": pseudoVoigtFit_results,"prefix":TaskConfigs.peakFittingTask_Config.fileName_prefix,"precision":TaskConfigs.peakFittingTask_Config.precision,"overwrite":False}
+        for saveDict in TaskConfigs.peakFittingTask_Config.saveFunctions:
             saveDict(save_params)  
             
         logger.info("Finished Task in %ss"%(str(time.time()-execTime_start))) 

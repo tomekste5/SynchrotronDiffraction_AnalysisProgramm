@@ -49,19 +49,19 @@ class GUI:
         labelIntegrationSettings = tk.Label(gui_main,text="Integration Settings: ",font="Arial 16")
         labelIntegrationSettings.grid(row=1,column=1,pady=14)
         
-        labelnptazim = tk.Label(gui_main,text="Nbpt azimuthal: ",font="Arial 14 ")
+        labelnptazim = tk.Label(gui_main,text="Nbpt azimuthal (1): ",font="Arial 14 ")
         labelnptazim.grid(row=2,column=1,sticky=tk.W)
         valueEntrynptazim = tk.StringVar()
         Entrynptazim = tk.Entry(gui_main,textvariable = valueEntrynptazim,width=15)
         Entrynptazim.grid(row=2,column=2,sticky=tk.W)
    
-        labelRadSteps = tk.Label(gui_main,text="Nbpt radial: ",font="Arial 14 ")
+        labelRadSteps = tk.Label(gui_main,text="Nbpt radial (1): ",font="Arial 14 ")
         labelRadSteps.grid(row=3,column=1,sticky=tk.W)
         valueEntryRadSteps = tk.StringVar()
         EntryRadSteps = tk.Entry(gui_main,textvariable = valueEntryRadSteps,width=15)
         EntryRadSteps.grid(row=3,column=2,sticky=tk.W)
         
-        labelRadialRange = tk.Label(gui_main,text="Radial range [start, end]: ",font="Arial 14 ")
+        labelRadialRange = tk.Label(gui_main,text="Radial range [start, end] (2 Theta (°)): ",font="Arial 14 ")
         labelRadialRange.grid(row=4,column=1,sticky=tk.W)
         valueEntryRadialRange = tk.StringVar()
         EntryRadialRange = tk.Entry(gui_main,textvariable = valueEntryRadialRange,width=15)
@@ -73,37 +73,37 @@ class GUI:
         labelExperimentConstants = tk.Label(gui_main,text="Experiment Constants: ",font="Arial 16")
         labelExperimentConstants.grid(row=1,column=3,sticky=tk.W,pady=14)
         
-        labelEModule = tk.Label(gui_main,text="E-Modulus Array: ",font="Arial 14 ")
+        labelEModule = tk.Label(gui_main,text="E-Modulus Array (Pa): ",font="Arial 14 ")
         labelEModule.grid(row=2,column=3,sticky=tk.W)
         valueEntryEModules = tk.StringVar()
         EntryEModules = tk.Entry(gui_main,textvariable=valueEntryEModules,width=30)
         EntryEModules.grid(row=2,column=4,sticky=tk.W)
         
-        labelPossionszahlen = tk.Label(gui_main,text="Poisson's Ratio Array: ",font="Arial 14 ")
+        labelPossionszahlen = tk.Label(gui_main,text="Poisson's Ratio Array (1): ",font="Arial 14 ")
         labelPossionszahlen.grid(row=3,column=3,sticky=tk.W)
         valueEntryPossionszahlen = tk.StringVar()
         EntryPossionszahlen = tk.Entry(gui_main,textvariable = valueEntryPossionszahlen,width=30)
         EntryPossionszahlen.grid(row=3,column=4,sticky=tk.W)
         
-        labeld0 = tk.Label(gui_main,text="d0: ",font="Arial 14 ")
+        labeld0 = tk.Label(gui_main,text="d0 (m): ",font="Arial 14 ")
         labeld0.grid(row=4,column=3,sticky=tk.W)
         valueEntryd0 = tk.StringVar()
         Entryd0 = tk.Entry(gui_main,textvariable = valueEntryd0,width=15)
         Entryd0.grid(row=4,column=4,sticky=tk.W)
         
-        labelWavelength = tk.Label(gui_main,text="Wavelength: ",font="Arial 14 ")
+        labelWavelength = tk.Label(gui_main,text="Wavelength (m): ",font="Arial 14 ")
         labelWavelength.grid(row=5,column=3,sticky=tk.W)
         varWaveLength = tk.StringVar() 
         EntryWavelength = tk.Entry(gui_main,textvariable=varWaveLength,width=15)
         EntryWavelength.grid(row=5,column=4,sticky=tk.W)
         
-        labelPositionsdatenX = tk.Label(gui_main,text="Position X Array: ",font="Arial 14 ")
+        labelPositionsdatenX = tk.Label(gui_main,text="Position X Array (mm): ",font="Arial 14 ")
         labelPositionsdatenX.grid(row=6,column=3,sticky=tk.W)
         valueEntryPositionsdatenX = tk.StringVar()
         EntryPositionsdatenX = tk.Entry(gui_main,textvariable = valueEntryPositionsdatenX,width=30)
         EntryPositionsdatenX.grid(row=6,column=4,sticky=tk.W)
         
-        labelPositionsdatenZ = tk.Label(gui_main,text="Position Z Array: ",font="Arial 14 ")
+        labelPositionsdatenZ = tk.Label(gui_main,text="Position Z Array (mm): ",font="Arial 14 ")
         labelPositionsdatenZ.grid(row=7,column=3,sticky=tk.W)
         valueEntryPositionsdatenZ = tk.StringVar()
         EntryPositionsdatenZ = tk.Entry(gui_main,textvariable = valueEntryPositionsdatenZ,width=30)
@@ -114,31 +114,31 @@ class GUI:
         labelAnalysisParams = tk.Label(gui_main,text="Analysis Parameters: ",font="Arial 16")
         labelAnalysisParams.grid(row=1,column=5,sticky=tk.W,pady=14)
         
-        labelStartTemp = tk.Label(gui_main,text="Temperature: ",font="Arial 14 ")
+        labelStartTemp = tk.Label(gui_main,text="Temperature (C°): ",font="Arial 14 ")
         labelStartTemp.grid(row=2,column=5,sticky=tk.W)
         valueEntryStartTemp = tk.StringVar()
         EntryStartTemp = tk.Entry(gui_main,textvariable = valueEntryStartTemp,width=15)
         EntryStartTemp.grid(row=2,column=6,sticky=tk.W)
              
-        labelThetaav = tk.Label(gui_main,text="Theta Av Array: ",font="Arial 14 ")
+        labelThetaav = tk.Label(gui_main,text="Theta Av Array (Theta (°)): ",font="Arial 14 ")
         labelThetaav.grid(row=3,column=5,sticky=tk.W)
         valueEntryThetaav = tk.StringVar()
         EntryThetaav = tk.Entry(gui_main,textvariable = valueEntryThetaav,width=30)
         EntryThetaav.grid(row=3,column=6,sticky=tk.W)
         
-        labelMinTheta = tk.Label(gui_main,text="Min. Theta: ",font="Arial 14 ")
+        labelMinTheta = tk.Label(gui_main,text="Min. Theta (2 Theta (°)): ",font="Arial 14 ")
         labelMinTheta.grid(row=4,column=5,sticky=tk.W)
         valueEntryMinTheta = tk.StringVar()
         EntryMinTheta = tk.Entry(gui_main,textvariable = valueEntryMinTheta,width=15)
         EntryMinTheta.grid(row=4,column=6,sticky=tk.W)
         
-        labelMaxTheta = tk.Label(gui_main,text="Max. Theta: ",font="Arial 14 ")
+        labelMaxTheta = tk.Label(gui_main,text="Max. Theta  (2 Theta (°)): ",font="Arial 14 ")
         labelMaxTheta.grid(row=5,column=5,sticky=tk.W)
         valueEntryMaxTheta = tk.StringVar()
         EntryMaxTheta = tk.Entry(gui_main,textvariable = valueEntryMaxTheta,width=15)
         EntryMaxTheta.grid(row=5,column=6,sticky=tk.W)
          
-        labelPeak = tk.Label(gui_main,text="Peak: ",font="Arial 14 ")
+        labelPeak = tk.Label(gui_main,text="Peak index (1): ",font="Arial 14 ")
         labelPeak.grid(row=6,column=5,sticky=tk.W)
         valueEntryPeak = tk.StringVar()
         EntryPeak = tk.Entry(gui_main,textvariable = valueEntryPeak,width=15)
@@ -148,21 +148,21 @@ class GUI:
         # defining vars used in the checkbuttons
     
         
-        varPseudoVoigtFit = tk.IntVar()
+        varPeakFitting = tk.IntVar()
         varAzimuthalIntegration = tk.IntVar()
-        varAxistransformation = tk.IntVar()
-        checkBoxVars = [varAzimuthalIntegration,varAxistransformation,varPseudoVoigtFit]
+        varEllipticalStrainFit = tk.IntVar()
+        checkBoxVars = [varAzimuthalIntegration,varEllipticalStrainFit,varPeakFitting]
         
         #Checkbuttons
         
-        CheckbuttonPseudoVoigtFit = tk.Checkbutton(gui_main,text="PseudoVoigt Fit",font="Arial 14",variable=varPseudoVoigtFit)
-        CheckbuttonPseudoVoigtFit.grid(row=11,column=2,columnspan=2)
+        CheckbuttonPseudoVoigtFit = tk.Checkbutton(gui_main,text="Peak Fitting",font="Arial 14",variable=varPeakFitting)
+        CheckbuttonPseudoVoigtFit.grid(row=11,column=3,columnspan=2)
         
         CheckbuttonAzimuthalIntegration = tk.Checkbutton(gui_main,text="Azimuthal Integration",font="Arial 14",variable=varAzimuthalIntegration)
-        CheckbuttonAzimuthalIntegration.grid(row=11,column=4,columnspan=2)
+        CheckbuttonAzimuthalIntegration.grid(row=11,column=2,columnspan=2)
 
-        CheckbuttonAxistransformation = tk.Checkbutton(gui_main,text="Axis Transformation",font="Arial 14",variable=varAxistransformation)
-        CheckbuttonAxistransformation.grid(row=11,column=3,columnspan=2)
+        CheckbuttonEllipticalStrainFit = tk.Checkbutton(gui_main,text="Elliptical Strain Fit",font="Arial 14",variable=varEllipticalStrainFit)
+        CheckbuttonEllipticalStrainFit.grid(row=11,column=4,columnspan=2)
 
 
         # set default cell width and height
@@ -178,8 +178,8 @@ class GUI:
         
         def var_states():
             selectedTasks = []
-            for taskName, isSelected in zip(["azimuthal_integration","axisTransform_fit","pseudoVoigt_fit"],checkBoxVars):
-                if(isSelected):
+            for taskName, isSelected in zip(["azimuthal_integration","ellipticalStrain_fit","peak_fit"],checkBoxVars):
+                if(isSelected.get()):
                     selectedTasks.append(taskName)
             
             param.setTasks(selectedTasks)
@@ -226,7 +226,7 @@ class GUI:
         buttonChooseOutputDirectory = tk.Button(gui_main,text="Choose output directory",font="Arial 14",width=22,height=1,command =chooseOutputDirectory)
         buttonChooseOutputDirectory.grid(row=9,column=3,sticky=tk.W)
         
-        buttonSelectCbfInputs = tk.Button(gui_main,text="Load Detector CBFs",font="Arial 14",width=22,height=1,command =selectDetectorData)
+        buttonSelectCbfInputs = tk.Button(gui_main,text="Load XRD-Datafiles",font="Arial 14",width=22,height=1,command =selectDetectorData)
         buttonSelectCbfInputs.grid(row=9,column=4,sticky=tk.W)
         
         buttonELabJson = tk.Button(gui_main,text="Load elab_param.json",font="Arial 14", command = openELabFTW,width=22,height=1)
@@ -316,6 +316,7 @@ class GUI:
         
         def stopProgressbar():
             progressbar.stop()
+            core.shutdown()
             gui_main.quit()
             
         
@@ -326,11 +327,8 @@ class GUI:
         
         
         # settings for the progress bar
-        
-        progressbarValue = tk.IntVar()
-        progressbarValue.set(1)  
          
-        progressbar = tkk.Progressbar(gui_main,orient="horizontal",mode="determinate",maximum=100,variable=progressbarValue,length=920)
+        progressbar = tkk.Progressbar(gui_main,orient="horizontal",mode="determinate",maximum=100,length=100)
         progressbar.grid(row=13,column=2,columnspan=5,sticky=tk.W)
         
        

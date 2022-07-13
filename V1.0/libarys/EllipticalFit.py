@@ -2,26 +2,11 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 
-def axisTransformFit(x,*p):
-    """Computes axis transformation ellipse for given azimuthal angles (x) and constant values
-
-    Args:
-        x (list): list of azimuthal Angles
-
-    Returns:
-        np.array: strainEllipse(x)
-    """
-    
-    eyy,ezz,eyz = p
-    theta = 5.8*np.pi/180 #change!
-    chi = x
-    return ((np.cos(theta))**2)*((np.sin(chi))**2)*eyy+((np.cos(theta))**2)*((np.cos(chi))**2)*ezz+((np.cos(theta))**2)*((np.sin(2*chi)))*eyz
-
 #poly1 function to fit initial guess
 def poly1(x,a, b, c):
     return a*x+b
 
-def doFit(azimuthalAngles,x0,x0_err,d0,wavelength):
+def doFit(azimuthalAngles,x0,x0_err,d0,wavelength,theta):
     """Fits strain ellipsoid on given x0 and azimuthal angles
 
     Args:
@@ -35,14 +20,14 @@ def doFit(azimuthalAngles,x0,x0_err,d0,wavelength):
         dictionary: A Dictionary which contains the chosen constants of the fit as well as there errors
     """
     trashData_count = np.count_nonzero([(np.array(x0)/np.array(x0_err)) <= 0.01]) #count how much rows are unusable doe to high error
-            
+    ellipticalFit = lambda x,*p :((np.cos(theta))**2)*((np.sin(x))**2)*p[0]+((np.cos(theta))**2)*((np.cos(x))**2)*p[1]+((np.cos(theta))**2)*((np.sin(2*x)))*p[2]
     if(trashData_count < len(azimuthalAngles)-6):
         strains = ((wavelength/(2*np.sin((x0/2)*np.pi/180)))-d0)/d0 #calculate strain via brag equation
         
         poly1_params = curve_fit(poly1,np.sin(azimuthalAngles*np.pi/180)**2,strains)[0]
         initialGuess = [poly1_params[0]+poly1_params[1],poly1_params[1],0]
 
-        normalStrains, normalStrains_covariance  = curve_fit(axisTransformFit,azimuthalAngles*np.pi/180,strains,initialGuess,ftol=10**(-12))
+        normalStrains, normalStrains_covariance  = curve_fit(ellipticalFit,azimuthalAngles*np.pi/180,strains,initialGuess,ftol=10**(-12))
         normalStrains_error = np.sqrt(np.diag(normalStrains_covariance))
 
 

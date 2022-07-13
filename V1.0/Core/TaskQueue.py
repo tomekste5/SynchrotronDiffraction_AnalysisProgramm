@@ -19,7 +19,7 @@ class TaskQueue:
         Returns:
             dictionary: A dictionary of all subdictionary of the tasks that matched a with one of the passed taskNames 
         """
-        return dict([(i, taskReg[i]) for i in taskNames if i in set(taskReg)])
+        return dict([(i, dict(taskReg[i])) for i in taskNames if i in set(taskReg)])
 
     def graphParser(taskOfInterest, tasksToExecute, numberOfDependentTasks):
         """Return the number of tasks that are dependent of the taskOfInterest.
@@ -121,5 +121,6 @@ class TaskQueue:
 
             else:
                tasks[taskName]["return_val"] = tasks[taskName]["handle"](*tasks[taskName]["input_params"]) #call Task handle
+        self.__taskQueue = []
                
                

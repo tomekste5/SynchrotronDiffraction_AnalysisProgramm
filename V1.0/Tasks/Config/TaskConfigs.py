@@ -25,9 +25,9 @@ class AzimuthalIntegrationTask_Config():
     loggingLevel = logging.INFO #logging level
     
     
-class PseudoVoigtFitTask_Config():
-    taskName = "pseudoVoigt_fit"
-    fileName_prefix = "pseudoVoigtFit"
+class peakFittingTask_Config():
+    taskName = "peak_fit"
+    fileName_prefix = "peakFitting"
     
     taskDescription = "Does a fit of a PseudoVoigt function to accurately fit peak in 2 Theta domain"
     taskDependencies = {AzimuthalIntegrationTask_Config.taskName :1}
@@ -41,12 +41,12 @@ class PseudoVoigtFitTask_Config():
     
     loggingLevel = logging.INFO
 
-class AxisTransformFitTask_Config():
-    taskName = "axisTransform_fit"
-    fileName_prefix = "AxisTransformFit"
+class EllipticalStrainFitTask_Config():
+    taskName = "ellipticalStrain_fit"
+    fileName_prefix = "ellipticalStrain_Fit"
     
     taskDescription = "Does a fit of the strain ellipse to get strain values in xx,zz,xz axis and calculates stresses"
-    taskDependencies = {PseudoVoigtFitTask_Config.taskName:1}
+    taskDependencies = {peakFittingTask_Config.taskName:1}
     
     precision = np.float64
     units = [{"File":"filepath","Z_positions":"mm","X_positions":"mm"}

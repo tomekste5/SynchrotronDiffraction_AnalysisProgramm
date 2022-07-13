@@ -1,6 +1,6 @@
-from Tasks.AxisTransformationFitTask import AxisTransformationTask
+from Tasks.EllipticalStrainFitTask import EllipticalStrainFitTask
 from Tasks.AzimuthalIntegrationTask import AzimuthalIntegrationTask
-from Tasks.PseudoVoigtFitTask import PseudoVoigtFitTask
+from Tasks.PeakFittingTask import PeakFittingTask
 
 from Utils.Param import Param
 from Tasks.Config import TaskConfigs
@@ -29,18 +29,18 @@ taskRegister = {
                 "handle":AzimuthalIntegrationTask.runTask,
                 "MultiProcessing":True        
     },
-    TaskConfigs.PseudoVoigtFitTask_Config.taskName: {
-                "description": TaskConfigs.PseudoVoigtFitTask_Config.taskDescription,
-                "dependencies": TaskConfigs.PseudoVoigtFitTask_Config.taskDependencies,
+    TaskConfigs.peakFittingTask_Config.taskName: {
+                "description": TaskConfigs.peakFittingTask_Config.taskDescription,
+                "dependencies": TaskConfigs.peakFittingTask_Config.taskDependencies,
                 "input_params": [Param.getGUIInstance,Param.getOutputDirectory,Param.getElabFtwJson,Param.getMinTheta,Param.getMaxTheta,Param.getDirectoryPaths,Param.getThetaAV,Param.getPeak,Param.getProgressBarHandles],
-                "handle":PseudoVoigtFitTask.runTask,
+                "handle":PeakFittingTask.runTask,
                 "MultiProcessing":True        
     },
-    TaskConfigs.AxisTransformFitTask_Config.taskName: {
-                "description": TaskConfigs.AxisTransformFitTask_Config.taskDescription,
-                "dependencies": TaskConfigs.AxisTransformFitTask_Config.taskDependencies,
-                "input_params": [Param.getGUIInstance,Param.getOutputDirectory,Param.getElabFtwJson,Param.getDirectoryPaths,Param.getWavelength,Param.getPeak,Param.getEModules,Param.getPoissonNumber,Param.getD0,Param.getPositionsZ,Param.getPositionsY,Param.getProgressBarHandles],
-                "handle":AxisTransformationTask.runTask,
+    TaskConfigs.EllipticalStrainFitTask_Config.taskName: {
+                "description": TaskConfigs.EllipticalStrainFitTask_Config.taskDescription,
+                "dependencies": TaskConfigs.EllipticalStrainFitTask_Config.taskDependencies,
+                "input_params": [Param.getGUIInstance,Param.getThetaAV,Param.getOutputDirectory,Param.getElabFtwJson,Param.getDirectoryPaths,Param.getWavelength,Param.getPeak,Param.getEModules,Param.getPoissonNumber,Param.getD0,Param.getPositionsZ,Param.getPositionsY,Param.getProgressBarHandles],
+                "handle":EllipticalStrainFitTask.runTask,
                 "MultiProcessing":True    
     }
 }
