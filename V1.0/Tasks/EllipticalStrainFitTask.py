@@ -138,13 +138,13 @@ class EllipticalStrainFitTask():
         #release the worker processes to start processing the jobs
         pool.start()
         
-        while(len(params["results"].keys()) < nrOfJobs):
-            time.sleep(1)
+        while(len(params["results"].keys()) < nrOfJobs+2):
+            time.sleep(0.1)
             progressBars[0]["value"] = (len(params["results"].keys())/(nrOfJobs+1) *100)
             logger.info("Reporting progress:    "+str(((len(params["results"].keys())/(nrOfJobs+1) *100)))+ "%")
             gui.update()
             
-        
+        progressBars[0]["value"] = 0
         AxisTransformationFit_results =dict(sorted(params["results"].items()))
         
         save_Params = {"outputPath":outputPath,"dict": AxisTransformationFit_results,"prefix":TaskConfigs.EllipticalStrainFitTask_Config.fileName_prefix,"precision":TaskConfigs.EllipticalStrainFitTask_Config.precision,"overwrite":False}

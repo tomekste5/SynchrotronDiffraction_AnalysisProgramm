@@ -39,7 +39,7 @@ class GUI:
         gui_message = tk.Tk()
         gui_main.title("Synchrotron Data Stress Analysis")
         gui_message.title("Attention!")
-        gui_main.geometry("1200x490")
+        gui_main.geometry("1400x490")
 
         labelEntryTip = tk.Label(gui_message, text = "Small fields are for floats with dot, no comma! Wide fields are for arrays of floats with dot, separated by commas!", font = ("Arial", 14, "italic"))
         labelEntryTip.grid(row = 0, column=0)
@@ -85,7 +85,7 @@ class GUI:
         EntryPossionszahlen = tk.Entry(gui_main,textvariable = valueEntryPossionszahlen,width=30)
         EntryPossionszahlen.grid(row=3,column=4,sticky=tk.W)
         
-        labeld0 = tk.Label(gui_main,text="d0 (m): ",font="Arial 14 ")
+        labeld0 = tk.Label(gui_main,text="d0 (mm): ",font="Arial 14 ")
         labeld0.grid(row=4,column=3,sticky=tk.W)
         valueEntryd0 = tk.StringVar()
         Entryd0 = tk.Entry(gui_main,textvariable = valueEntryd0,width=15)
@@ -138,7 +138,7 @@ class GUI:
         EntryMaxTheta = tk.Entry(gui_main,textvariable = valueEntryMaxTheta,width=15)
         EntryMaxTheta.grid(row=5,column=6,sticky=tk.W)
          
-        labelPeak = tk.Label(gui_main,text="Peak index (1): ",font="Arial 14 ")
+        labelPeak = tk.Label(gui_main,text="Peak Index (1): ",font="Arial 14 ")
         labelPeak.grid(row=6,column=5,sticky=tk.W)
         valueEntryPeak = tk.StringVar()
         EntryPeak = tk.Entry(gui_main,textvariable = valueEntryPeak,width=15)
@@ -328,7 +328,7 @@ class GUI:
         
         # settings for the progress bar
          
-        progressbar = tkk.Progressbar(gui_main,orient="horizontal",mode="determinate",maximum=100,length=100)
+        progressbar = tkk.Progressbar(gui_main,orient="horizontal",mode="determinate",maximum=100,length=980)
         progressbar.grid(row=13,column=2,columnspan=5,sticky=tk.W)
         
        

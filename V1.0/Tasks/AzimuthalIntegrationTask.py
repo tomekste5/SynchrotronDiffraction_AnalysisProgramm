@@ -104,12 +104,12 @@ class AzimuthalIntegrationTask():
             
             azimuthalIntegration_results =dict(sorted(params["results"].items()))
             
-            while(len(params["results"].keys()) < nrOfJobs):
-                time.sleep(1)
+            while(len(params["results"].keys()) < nrOfJobs+2):
+                time.sleep(0.1)
                 progressBars[0]["value"] = (len(params["results"].keys())/(nrOfJobs+1) *100)
                 logger.info("Reporting progress:    "+str(((len(params["results"].keys())/(nrOfJobs+1) *100)))+ "%")
                 gui.update()
-
+            progressBars[0]["value"] = 0
             logger.info("Finished Task in %ss"%(str(time.time()-executionStart))) 
             
             return azimuthalIntegration_results

@@ -34,7 +34,7 @@ class peakFittingTask_Config():
     
     precision = np.float64
     units = [{"FilePath":"string","azimAngle":"°"}
-             | {"LorCoeff":"unknown","A":"xray count","x0":"2 Theta","FWHM":"unknown","LorCoeff_Err":"unknown","A_Err":"xray count","x0_Err":"°","FWHM_Err":"unkown"}]
+             | {"LorCoeff":"unknown","A":"1","x0":"2 Theta","FWHM":"unknown","LorCoeff_Err":"unknown","A_Err":"xray count","x0_Err":"°","FWHM_Err":"unkown"}]
     
     loadFunction = XRayDetectorDataParser.loadAzimuthalIntegrationDataFile
     saveFunctions = [CsvParser.writeCSV_single,CsvParser.writeCSV_eachDirectory,PickleParser.writePickle_eachDirectory,PickleParser.writePickle_single,JsonParser.saveSettings_single,JsonParser.writeJson_single]
@@ -50,8 +50,8 @@ class EllipticalStrainFitTask_Config():
     
     precision = np.float64
     units = [{"File":"filepath","Z_positions":"mm","X_positions":"mm"}
-             | {"strainYY":"1","strainZZ":"1","strainYZ":"1","strainYY_Err":"1","strainZZ_Err":"1","strainYZ_Err":"1"}
-             | {"stressXX":"Pa","stressYY":"Pa","stressYZ":"Pa","stressHydro":"Pa","stressMises":"Pa"}
+             | {"strainXX":"1","strainZZ":"1","strainXZ":"1","strainXX_Err":"1","strainZZ_Err":"1","strainXZ_Err":"1"}
+             | {"stressXX":"Pa","stressZZ":"Pa","stressXZ":"Pa","stressHydro":"Pa","stressMises":"Pa"}
              | {"FWHM":"unknown","A":"1","x0":"2 Theta"}]
     
     loadFunction = PickleParser.loadPickle
